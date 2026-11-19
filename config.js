@@ -3,8 +3,8 @@
    NUNCA coloque aqui a chave "secret"/"service_role".
    Com os dois campos vazios o app funciona em modo estático (só os dados embutidos). */
 window.MM_CONFIG = {
-  url: "",
-  key: "",
+  url: "https://uatktjfqxbvfednxelrp.supabase.co",
+  key: "sb_publishable_M_i-3X1VYWyHHGmvrqX0Kg_efE3ybOe",
   /* WhatsApp (DDD + número, só dígitos) que recebe os interessados em locar boxes vagos. Ex.: "5562999999999" */
   whatsLocacao: "556284320643"
 };
