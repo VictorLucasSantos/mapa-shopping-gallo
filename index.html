@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#6b1c2b">
+<script>try{var t=JSON.parse(localStorage.getItem("mm_theme")||"null");if(!t)t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";document.documentElement.dataset.theme=t}catch(e){}</script>
+<title>Mapa Shopping Gallo · Região da 44</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,500;0,700;0,900;1,700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f7f1ee;--panel:#fff;--ink:#2a1519;--mut:#7a5a60;--line:#eadad7;--acc:#b8283f;--acc2:#6b1c2b;--corr:#efe3df;--store:#fff;--me:#1a73e8;--sel:#ffe3e3;--vaga:#fff1c2;--dest:#fff7e0;--halo:#fff;--chip:#f4e8e5;--navy:#6b1c2b;--navy2:#3a0f19;--gold:#f0b429;--shadow:0 2px 10px rgba(30,28,80,.14)}
+[data-theme=dark]{--bg:#1a0d11;--panel:#26141a;--ink:#f1f0fb;--mut:#a9a7cf;--line:#4a2a33;--acc:#ff7a8f;--acc2:#e8a0ab;--corr:#3a232b;--store:#33202a;--me:#5aa0ff;--sel:#5b2a3a;--vaga:#4d3f10;--dest:#3b2a31;--halo:#14132e;--chip:#3a242c;--shadow:0 2px 12px rgba(0,0,0,.5)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:Roboto,system-ui,-apple-system,"Segoe UI",sans-serif}
+body{display:flex;flex-direction:column;overflow:hidden;height:100dvh}
+button{font:inherit;color:inherit;cursor:pointer}
+svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+header{padding:10px 12px 10px;background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 100%);color:#fff;flex:none;position:relative}
+header:after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:linear-gradient(90deg,#e02020,#ff8a1e,var(--gold))}
+.top{display:flex;align-items:center;gap:10px}
+.logo{width:42px;height:42px;border-radius:12px;background:#fff;padding:4px;object-fit:contain;flex:none;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.logo.fb{display:grid;place-items:center;background:var(--acc);color:#fff;font-weight:900;font-size:16px;padding:0}
+.ttl{flex:1;min-width:0}
+.ttl b{font-size:17px;line-height:1.1;display:block;font-weight:900;letter-spacing:.2px;text-transform:uppercase}
+.ttl b span{color:var(--gold);font-weight:700;text-transform:none;font-style:italic;margin-left:4px}
+.ttl small{display:block;font-size:12.5px;opacity:.82;line-height:1.3;margin-top:2px}
+.ibtn{width:42px;height:42px;border-radius:12px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.1);color:#fff;flex:none;display:grid;place-items:center;padding:0}
+.ibtn.on{background:var(--me);border-color:var(--me)}
+#inst{display:none}
+#th .sun{display:none}[data-theme=dark] #th .sun{display:block}[data-theme=dark] #th .moon{display:none}
+.search{position:relative;margin-top:10px}
+.search input{width:100%;height:48px;font:inherit;font-size:16px;padding:0 44px 0 44px;border-radius:14px;border:2px solid transparent;background:#fff;color:#2a1519;outline:none;-webkit-appearance:none}
+[data-theme=dark] .search input{background:#232250;color:#f1f0fb}
+.search input::placeholder{color:#7d7ba3}
+.search input:focus{border-color:var(--gold)}
+.search .si{position:absolute;left:13px;top:13px;color:var(--acc);pointer-events:none}
+#qx{position:absolute;right:5px;top:6px;width:36px;height:36px;border:0;background:none;font-size:17px;color:#7d7ba3;display:none}
+#fchip{display:none;margin-top:8px}
+.fc{display:inline-flex;align-items:center;gap:6px;background:var(--gold);color:#3a0f19;border-radius:999px;padding:7px 10px 7px 12px;font-size:13.5px;font-weight:700;border:0}
+nav{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:8px 12px;background:var(--panel);border-bottom:1px solid var(--line);flex:none}
+nav::-webkit-scrollbar{display:none}
+.tab{flex:none;font-size:13.5px;font-weight:700;padding:8px 13px;border-radius:999px;color:var(--mut);border:1px solid var(--line);cursor:pointer;white-space:nowrap;background:transparent}
+.tab.on{color:#fff;background:var(--navy);border-color:var(--navy)}
+[data-theme=dark] .tab.on{background:var(--acc);border-color:var(--acc);color:#14132e}
+.tab b{font-size:11px;background:var(--acc);color:#fff;border-radius:999px;padding:1px 6px;margin-left:6px}
+.tab.on b{background:#fff;color:var(--navy)}
+.sep{width:1px;background:var(--line);flex:none;margin:4px 2px}
+#mapwrap{position:relative;flex:1;min-height:0;touch-action:none;overflow:hidden;background:radial-gradient(circle at 1px 1px,var(--line) 1px,transparent 0) 0 0/20px 20px,var(--bg)}
+svg#map{width:100%;height:100%;display:block;user-select:none}
+.fab{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;gap:6px}
+.fab button{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:19px;font-weight:800;box-shadow:var(--shadow);display:grid;place-items:center;padding:0}
+.fab button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.fab .t3{font-size:14px;font-weight:900}
+.fab .rot{display:none;font-size:20px}.v3 .fab .rot{display:grid}
+.fabl{position:absolute;left:10px;top:10px}
+.fabl button{height:44px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:13.5px;font-weight:700;box-shadow:var(--shadow)}
+.fabl button.on{background:var(--me);color:#fff;border-color:var(--me)}
+.hint{position:absolute;left:50%;top:64px;transform:translateX(-50%);background:var(--navy2);color:#fff;font-size:13.5px;font-weight:500;padding:10px 14px;border-radius:12px;display:none;max-width:88%;text-align:center;z-index:3;box-shadow:var(--shadow)}
+#sheet{background:var(--panel);border-radius:22px 22px 0 0;box-shadow:0 -6px 24px rgba(20,18,70,.18);display:flex;flex-direction:column;flex:none;transition:height .22s;overflow:hidden;border-top:1px solid var(--line)}
+#sheet.peek{height:auto}#sheet.peek .body{display:none}#sheet.mid{height:38vh}#sheet.full{height:82vh}
+.grab{padding:18px 14px 10px;display:flex;align-items:center;gap:10px;cursor:grab;touch-action:none;position:relative;flex:none}
+.grab:before{content:"";width:40px;height:5px;border-radius:5px;background:var(--line);position:absolute;left:50%;top:6px;transform:translateX(-50%)}
+.grab .t{font-size:16px;font-weight:900;flex:1;min-width:0;line-height:1.25;overflow-wrap:anywhere}
+.grab .m{font-size:12.5px;color:var(--mut);text-align:right;flex:none;max-width:45%}
+.body{overflow:auto;padding:0 14px 18px;flex:1;-webkit-overflow-scrolling:touch}
+h3{font-size:12.5px;margin:16px 0 8px;text-transform:uppercase;letter-spacing:.8px;color:var(--mut);font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.cat{border:1px solid var(--line);border-radius:16px;padding:10px 4px 9px;text-align:center;background:var(--panel);color:var(--ink)}
+.cat .e{width:46px;height:46px;border-radius:50%;margin:0 auto 5px;display:grid;place-items:center;font-size:25px;line-height:1}
+.cat b{font-size:13px;display:block;line-height:1.2;overflow-wrap:anywhere;font-weight:700}.cat small{color:var(--mut);font-size:11.5px}
+.item{display:flex;gap:11px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.ico{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;font-size:24px;flex:none}
+.item .mid{flex:1;min-width:0}
+.item .n{font-weight:700;font-size:15px;line-height:1.25;overflow-wrap:anywhere}
+.item .l{font-size:13px;color:var(--mut);line-height:1.35;margin-top:2px;overflow-wrap:anywhere}
+.rt{display:flex;align-items:center;gap:8px;flex:none}
+.dist{font-size:13px;font-weight:700;color:var(--acc2);white-space:nowrap}
+.add{width:40px;height:40px;border-radius:50%;border:2px solid var(--acc);background:transparent;color:var(--acc);font-size:20px;font-weight:700;line-height:1;padding:0}
+.add.in{background:var(--acc);color:#fff}
+.star{color:#f0a500}
+.card h2{font-size:21px;margin:2px 0 3px;line-height:1.2;font-weight:900;overflow-wrap:anywhere}
+.loc{font-size:14px;color:var(--mut);font-weight:500;line-height:1.4}
+.dsum{display:inline-flex;gap:6px;align-items:center;background:var(--chip);color:var(--acc2);font-weight:700;font-size:13.5px;padding:6px 12px;border-radius:999px;margin:8px 0 2px}
+.promo{margin:8px 0;padding:10px 12px;border-radius:12px;background:var(--vaga);border:1px solid #e4b73a;font-size:14px;font-weight:500;line-height:1.4;color:var(--ink)}
+.desc{font-size:14px;line-height:1.5;margin:6px 0}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.tag{font-size:12.5px;font-weight:700;padding:5px 10px;border-radius:999px;background:var(--chip)}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.btn{font-size:14.5px;font-weight:700;padding:0 14px;min-height:46px;border-radius:12px;border:1px solid var(--line);background:var(--panel);text-decoration:none;color:var(--ink);display:inline-flex;align-items:center;justify-content:center;gap:6px;text-align:center;line-height:1.2}
+.btn.b{background:var(--navy);border-color:var(--navy);color:#fff;flex:1 1 150px}
+[data-theme=dark] .btn.b{background:var(--me);border-color:var(--me)}
+.btn.g{background:var(--acc);border-color:var(--acc);color:#fff;flex:1 1 150px}
+.btn.g.in{background:transparent;color:var(--acc)}
+.btn.w{background:#1faa59;border-color:#1faa59;color:#fff}
+.btn.sm{min-height:40px;font-size:13.5px;padding:6px 12px}
+.stepsbox{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:11px 13px;margin-top:8px}
+ol.steps{margin:5px 0 0;padding-left:20px;font-size:14.5px;line-height:1.5}ol.steps li{margin:6px 0}
+.note{font-size:13px;color:var(--mut);line-height:1.5;margin-top:10px}.note a{color:var(--acc);font-weight:700}
+.warn{font-size:13.5px;background:var(--vaga);border:1px solid #e4b73a;border-radius:12px;padding:10px 12px;margin-top:8px;line-height:1.45}
+.empty{font-size:14.5px;color:var(--mut);padding:14px 0;line-height:1.55}
+.intro{background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-top:6px}
+.intro ol{margin:6px 0 10px;padding-left:20px;font-size:14.5px;line-height:1.55}
+.stop{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.num{width:32px;height:32px;border-radius:50%;background:var(--acc);color:#fff;font-weight:900;display:grid;place-items:center;flex:none;font-size:14px}
+.stop .mid{flex:1;min-width:0;cursor:pointer}
+.stop .n{font-weight:700;font-size:15px;line-height:1.25;overflow-wrap:anywhere}.stop .l{font-size:13px;color:var(--mut);line-height:1.35}
+.mini{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--panel);font-size:14px;padding:0;color:var(--ink)}.mini:disabled{opacity:.35}
+details.sp{margin:2px 0 4px 42px}details.sp summary{font-size:13.5px;font-weight:700;color:var(--acc);cursor:pointer;padding:4px 0}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+footer#bar{display:flex;background:var(--panel);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);flex:none}
+#bar button{flex:1;border:0;background:none;padding:8px 2px 7px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:12px;font-weight:700;color:var(--mut);position:relative}
+#bar button.on{color:var(--acc)}
+#bar button.on:before{content:"";position:absolute;top:0;left:30%;right:30%;height:3px;border-radius:0 0 3px 3px;background:var(--acc)}
+#bd{position:absolute;top:3px;left:calc(50% + 6px);background:var(--acc);color:#fff;border-radius:999px;font-size:11px;padding:1px 6px;display:none}
+@keyframes dash{to{stroke-dashoffset:-24}}
+@keyframes pulse{0%{r:7;opacity:.5}100%{r:22;opacity:0}}
+@keyframes pulse3{0%{opacity:.4}100%{opacity:0}}
+.route{animation:dash .8s linear infinite}.pulse{animation:pulse 1.6s ease-out infinite}.pulse3{animation:pulse3 1.6s ease-out infinite}
+</style>
+</head>
+<body>
+<header>
+  <div class="top">
+    <img class="logo" id="logo" alt="Shopping Gallo" src="https://regiaoda44.com/wp-content/uploads/2024/12/LOGO_GALLO-1.png" onerror="this.outerHTML='<div class=&quot;logo fb&quot;>G</div>'">
+    <div class="ttl"><b>Shopping Gallo<span>Mapa</span></b><small id="sub">Região da 44 · Goiânia</small></div>
+    <button class="ibtn" id="inst" aria-label="Instalar o app"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></svg></button>
+    <button class="ibtn" id="th" aria-label="Alternar tema claro/escuro"><svg class="i moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 019.5 4 8 8 0 1020 14.5z"/></svg><svg class="i sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg></button>
+    <button class="ibtn" id="gps" aria-label="Usar o GPS"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button>
+  </div>
+  <div class="search"><svg class="i si" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input id="q" type="search" placeholder="O que você procura? Ex.: biquíni, jeans, tênis" autocomplete="off" enterkeyhint="search"><button id="qx" aria-label="Limpar busca">✕</button></div>
+  <div id="fchip"></div>
+</header>
+<nav id="tabs" aria-label="Prédio e andar"></nav>
+<div id="mapwrap">
+  <svg id="map" xmlns="http://www.w3.org/2000/svg"></svg>
+  <div class="fabl"><button id="mark">📍 Marcar onde estou</button></div>
+  <div class="fab">
+    <button id="cam" class="on" aria-label="Ver o caminho na câmera">📷</button>
+    <button id="v3" class="t3" aria-label="Alternar entre mapa 2D e 3D">3D</button>
+    <button id="rl" class="rot" aria-label="Girar para a esquerda">⟲</button>
+    <button id="rr" class="rot" aria-label="Girar para a direita">⟳</button>
+    <button id="zin" aria-label="Aproximar">+</button><button id="zout" aria-label="Afastar">−</button><button id="zfit" aria-label="Ver tudo" style="font-size:15px">⤢</button>
+  </div>
+  <div class="hint" id="hint"></div>
+</div>
+<section id="sheet" class="mid">
+  <div class="grab" id="grab"><span class="t" id="st">Buscar</span><span class="m" id="sm"></span></div>
+  <div class="body" id="sb"></div>
+</section>
+<footer id="bar">
+  <button data-v="home" class="on"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Buscar</button>
+  <button data-v="map"><svg class="i" viewBox="0 0 24 24"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"/></svg>Mapa</button>
+  <button data-v="list"><svg class="i" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/></svg>Minha lista<b id="bd"></b></button>
+  <button data-v="me"><svg class="i" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0114 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>Onde estou</button>
+</footer>
+<script src="config.js"></script>
+<script src="lojas-data.js"></script>
+<script src="fuse.min.js"></script>
+<script src="core.js"></script>
+<script src="camera.js"></script>
+<script>
+"use strict";
+const {BUILD,BORDER,FLOORS,SEGS,SEGCOLOR,esc} = MM;
+const $ = id => document.getElementById(id);
+let STORES = [], G = {}, INFO = {src:"embutido",date:""};
+const st = {g:null,q:"",seg:null,sel:null,me:null,marking:false,gps:null,gpsB:null,gpsMsg:"",auto:false,
+  view:"home",back:"home",sheet:"mid",v3:false,rot:-30,list:[],manual:false,okey:"",more:60};
+const lsGet=(k,d)=>{ try{ const v=localStorage.getItem(k); return v==null?d:JSON.parse(v); }catch(e){ return d; } };
+const lsSet=(k,v)=>{ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} };
+st.me = lsGet("mm_me",null); if(!(st.me&&st.me.x!=null)) st.me=null;
+st.v3 = lsGet("mm_v3",false); st.rot = lsGet("mm_rot",-30); st.list = lsGet("mm_list",[]); st.manual = lsGet("mm_manual",false);
+let match = () => true;
+const filtering = () => !!(st.seg || st.q.trim());
+
+/* ---------- utilidades ---------- */
+const fromPos = () => st.me && G[st.me.g] ? st.me : null;
+const curRef = () => { const m=fromPos(); if(m) return {g:m.g,x:m.x,y:m.y}; const g=G[st.g]; return {g:g.key,x:g.entry.x,y:g.entry.y}; };
+const refLabel = () => fromPos() ? "sua posição" : `entrada do ${BUILD[G[st.g].b].short} (${FLOORS[st.g.split("|")[1]].split(" ·")[0]})`;
+const mTxt = m => m==null||!isFinite(m)?"":`~${Math.max(5,Math.round(m/5)*5)} m`;
+const minTxt = m => `${Math.max(1,Math.round(m/70))} min a pé`;
+const tint = s => (SEGCOLOR[s.prim]||"#999")+"22";
+const locTxt = s => `${BUILD[s.b].short} · ${FLOORS[s.f].split(" ·")[0]} · ${esc(s.cor)}${s.num?` · ${esc(s.num)}`:""}`;
+let dcache = {S:null,key:"",map:null};
+function allDist(){
+  const r=curRef(), key=r.g+"|"+Math.round(r.x)+"|"+Math.round(r.y);
+  if (dcache.S===STORES && dcache.key===key) return dcache.map;
+  dcache = {S:STORES,key,map:MM.distMany(G,r,STORES)}; return dcache.map;
+}
+const listStores = () => st.list.map(sl=>STORES.find(s=>s.s===sl)).filter(Boolean);
+function ensureOrder(){
+  if (!st.list.length) return [];
+  if (!st.manual){
+    const r=curRef(), key=r.g+"|"+Math.round(r.x)+"|"+Math.round(r.y)+"|"+st.list.slice().sort().join(",");
+    if (st.okey!==key){ const o=MM.orderNearest(G,r,listStores()); st.list=o.map(s=>s.s); st.okey=key; lsSet("mm_list",st.list); }
+  }
+  return listStores();
+}
+function planList(){
+  const order=ensureOrder(); let cur=fromPos(); const legs=[];
+  order.forEach((s,i)=>{ legs.push(MM.leg(G,cur,s,i===0?"De onde você está,":`Saindo de <b>${esc(order[i-1].n)}</b>,`)); cur={g:s.g,x:s.door.x,y:s.door.y}; });
+  return legs;
+}
+function toast(t,ms){ const h=$("hint"); h.textContent=t; h.style.display="block"; clearTimeout(toast.t); if(ms) toast.t=setTimeout(()=>{ if(!st.marking) h.style.display="none"; },ms); }
+
+/* ---------- mapa (2D / 3D) ---------- */
+const V = () => MM.proj3(G[st.g], st.rot);
+const pz = MM.panZoom($("map"), $("mapwrap"), {
+  tap(target, p){
+    if (st.marking){ markAt(st.v3 ? V().inv(p.x,p.y) : p); return; }
+    const el = target.closest && target.closest("[data-id]");
+    if (el) selectStore(+el.getAttribute("data-id"), false);
+  }
+});
+function centerOn(x,y,w){ const p = st.v3 ? V().P(x,y,0) : {x,y}; pz.center(p.x,p.y,w); }
+function fit(){ const g=G[st.g]; if(g) pz.fit(st.v3 ? V().bounds : MM.bounds(g)); }
+function draw(){
+  const g=G[st.g]; if(!g) return;
+  let paths=null, badges=[]; const s = st.sel!=null ? STORES[st.sel] : null;
+  if (st.view==="store" && s){ const lg=MM.leg(G,fromPos(),s,""); paths = lg.parts.filter(p=>p.g===st.g).map(p=>p.pts); badges=lg.vert.filter(v=>v.g===st.g); }
+  else if (st.view==="list" && st.list.length){ paths=[]; planList().forEach(l=>{ l.parts.forEach(p=>{ if(p.g===st.g) paths.push(p.pts); }); (l.vert||[]).forEach(v=>{ if(v.g===st.g) badges.push(v); }); }); }
+  const stops={}; ensureOrder().forEach((x,i)=>stops[x.id]=i+1);
+  const o={filter:filtering()?match:null, sel:st.sel, paths, badges, me:st.me&&st.me.g===st.g?st.me:null, stops:Object.keys(stops).length?stops:null};
+  $("map").innerHTML = st.v3 ? MM.draw3d(g,Object.assign(o,{V:V()})) : MM.draw(g,o);
+}
+$("zin").onclick=()=>pz.zoom(1.4); $("zout").onclick=()=>pz.zoom(1/1.4); $("zfit").onclick=fit;
+function setV3(on){
+  st.v3=on; lsSet("mm_v3",on); $("v3").classList.toggle("on",on); $("v3").textContent=on?"2D":"3D"; $("mapwrap").classList.toggle("v3",on);
+  draw(); if(st.sel!=null&&st.view==="store"){ const s=STORES[st.sel]; centerOn(s.door.x,s.door.y,340); } else fit();
+}
+$("v3").onclick=()=>setV3(!st.v3);
+function rotate(d){
+  const g=G[st.g], vb=pz.vb(), c=V().inv(vb.x+vb.w/2, vb.y+vb.h/2);
+  st.rot=(st.rot+d)%360; lsSet("mm_rot",st.rot); draw();
+  const p=MM.proj3(g,st.rot).P(c.x,c.y,0); pz.center(p.x,p.y,vb.w);
+}
+$("rl").onclick=()=>rotate(-30); $("rr").onclick=()=>rotate(30);
+
+/* ---------- posição ---------- */
+const saveMe = () => lsSet("mm_me",st.me);
+function markAt(p){ const g=G[st.g], q=MM.nearest(g,p); st.me={g:st.g,x:q.x,y:q.y,how:"mapa"}; saveMe(); setMarking(false); toast("📍 Posição marcada. As distâncias foram atualizadas.",2500); refresh(); }
+function meAtStore(id){ const s=STORES[id]; st.me={g:s.g,x:s.door.x,y:s.door.y,how:"loja"}; saveMe(); refresh(); toast("📍 Posição marcada em "+s.n,2500); }
+function setMarking(on){ st.marking=on; $("mark").classList.toggle("on",on); $("mark").textContent=on?"✕ Cancelar":"📍 Marcar onde estou"; if(on){ setSheet("peek"); toast("Toque no corredor onde você está"); } else $("hint").style.display="none"; }
+$("mark").onclick=()=>setMarking(!st.marking);
+function applyHash(){
+  const h=location.hash.slice(1); if(!h.startsWith("qr-")) return;
+  const r=MM.resolveQR(h,G); if(!r) return;
+  st.me={g:r.g,x:r.x,y:r.y,how:"qr"}; saveMe(); showGroup(r.g,false); centerOn(r.x,r.y,380); refresh();
+  toast("📍 Você está em: "+r.label,4000); MM.track("qr",{ponto:h});
+}
+window.addEventListener("hashchange",applyHash);
+
+/* ---------- barra inferior e painel ---------- */
+function setSheet(s){ st.sheet=s; $("sheet").className=s; markBar(); }
+function markBar(){
+  const v = st.sheet==="peek" ? "map" : st.view==="list" ? "list" : st.view==="me" ? "me" : "home";
+  document.querySelectorAll("#bar button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));
+  const n=st.list.length; $("bd").style.display=n?"block":"none"; $("bd").textContent=n;
+}
+$("bar").onclick=e=>{ const b=e.target.closest("button[data-v]"); if(!b) return; const v=b.dataset.v; setMarking(false);
+  if(v==="map"){ setSheet("peek"); return; }
+  st.sel=null; st.view = v==="home" ? (filtering()?"results":"home") : v; setSheet(st.sheet==="peek"?"mid":st.sheet); refresh(); $("sb").scrollTop=0; if(v==="home") $("q").focus({preventScroll:true}); };
+{ const gr=$("grab"); let y0=null, moved=false;
+  gr.addEventListener("pointerdown",e=>{ y0=e.clientY; moved=false; gr.setPointerCapture(e.pointerId); });
+  gr.addEventListener("pointermove",e=>{ if(y0==null) return; const d=e.clientY-y0; if(Math.abs(d)>28){ moved=true; const o=["peek","mid","full"], i=o.indexOf(st.sheet); setSheet(o[Math.max(0,Math.min(2,i+(d<0?1:-1)))]); y0=e.clientY; } });
+  gr.addEventListener("pointerup",()=>{ if(y0!=null&&!moved){ setSheet(st.sheet==="peek"?"mid":"peek"); } y0=null; });
+}
+
+/* ---------- abas de prédio/andar e filtro ---------- */
+function renderTabs(){
+  let h="", last=null;
+  for (const k of MM.groupOrder(G)){
+    const g=G[k]; if (last && last!==g.b) h+=`<span class="sep"></span>`;
+    const n = filtering() ? g.stores.filter(match).length : 0;
+    h+=`<span class="tab ${st.g===k?"on":""}" data-g="${k}">${BUILD[g.b].short} · ${FLOORS[g.f].split(" ·")[0]}${n?`<b>${n}</b>`:""}</span>`; last=g.b;
+  }
+  $("tabs").innerHTML=h;
+  const on=$("tabs").querySelector(".tab.on"); if(on&&on.scrollIntoView) on.scrollIntoView({inline:"center",block:"nearest"});
+}
+$("tabs").onclick = e => { const t=e.target.closest(".tab"); if(t) showGroup(t.dataset.g,true); };
+function renderFilter(){
+  const f=$("fchip");
+  f.style.display=st.seg?"block":"none";
+  f.innerHTML=st.seg?`<button class="fc" id="fx">${MM.iconOf(st.seg)} ${esc(st.seg)} <span aria-label="Remover filtro">✕</span></button>`:"";
+  $("qx").style.display=st.q?"block":"none";
+}
+$("fchip").onclick=()=>{ st.seg=null; st.sel=null; st.view=filtering()?"results":"home"; refresh(true); };
+$("qx").onclick=()=>{ $("q").value=""; st.q=""; st.sel=null; st.view=filtering()?"results":"home"; refresh(true); };
+
+/* ---------- ações ---------- */
+function showGroup(k,doFit){ st.g=k; renderTabs(); draw(); if(doFit) fit(); const g=G[k]; $("sub").textContent=`${BUILD[g.b].name} · ${FLOORS[g.f]}`; }
+function selectStore(id,center,notrack){
+  const s=STORES[id]; if(st.view!=="store") st.back=st.view;
+  st.sel=id; st.view="store";
+  if (st.g!==s.g) showGroup(s.g,false);
+  if (st.sheet==="peek"||st.sheet==="full") setSheet("mid"); else markBar();
+  draw(); renderSheet(); if(center!==false) centerOn(s.door.x,s.door.y,340); if(!notrack) MM.track("loja",{loja:s.s});
+}
+function backFromStore(){ st.sel=null; st.view=st.back==="store"?"home":st.back; if(st.view==="home"&&filtering()) st.view="results"; refresh(); }
+function toggleList(id){
+  const s=STORES[id], i=st.list.indexOf(s.s);
+  if (i>=0){ st.list.splice(i,1); toast("Removida da lista",1500); } else { st.list.push(s.s); toast(`✓ Adicionada à lista (${st.list.length}). Veja em “Minha lista”.`,2200); }
+  st.okey=""; lsSet("mm_list",st.list); ensureOrder(); markBar();
+  const sc=$("sb").scrollTop; draw(); renderSheet(); $("sb").scrollTop=sc;
+}
+function moveStop(i,d){ const j=i+d; if(j<0||j>=st.list.length) return; [st.list[i],st.list[j]]=[st.list[j],st.list[i]]; st.manual=true; lsSet("mm_manual",true); lsSet("mm_list",st.list); draw(); renderSheet(); }
+
+/* ---------- câmera ---------- */
+function openCam(s, fromList){
+  const g=G[s.g], me=fromPos(), same=!!me&&me.g===s.g;
+  if (st.g!==s.g) showGroup(s.g,false);
+  MM.track("cam",{loja:s.s});
+  const order = fromList ? ensureOrder() : [];
+  let idx = fromList ? order.findIndex(x=>x.id===s.id) : -1;
+  const more = () => fromList && idx>=0 && idx<order.length-1;
+  const arr=same?null:((MM.leg(G,me,s,"").vert||[]).find(v=>v.g===s.g)||g.entry);
+  MM.cam.open({ g, store:s, from: same ? me : arr,
+    move(p,key){ st.me={g:key||g.key,x:p.x,y:p.y,how:"cam"}; saveMe(); },
+    qr(code,gg){ const r=MM.resolveQR(code,G); if(!r||r.g!==gg.key) return null; MM.track("qr",{ponto:code}); return {x:r.x,y:r.y}; },
+    tag(){ return fromList&&idx>=0 ? `Parada ${idx+1}/${order.length}` : ""; },
+    hasNext: more,
+    next(){ if(!more()) return null; idx++; const n=order[idx], gg=G[n.g], prev=order[idx-1], sameG=prev.g===n.g;
+      return { g:gg, store:n, from: sameG ? {x:prev.door.x,y:prev.door.y} : gg.entry, note: sameG ? "" : `Próxima parada em outro andar/prédio: ${BUILD[n.b].short} · ${FLOORS[n.f].split(" ·")[0]}. Vá até a entrada/escada e siga a seta.` }; },
+    close(){ refresh(); } });
+  if (!same) setTimeout(()=>{ const m=document.getElementById("cmsg"); if(m){ m.textContent=`Rota a partir da entrada do ${FLOORS[g.f].split(" ·")[0]} do ${BUILD[g.b].short}. Leia o QR Code de um corredor para começar de onde você está.`; m.style.display="block"; } },300);
+}
+
+$("cam").onclick=()=>{
+  if(st.sel!=null&&STORES[st.sel]) return openCam(STORES[st.sel],false);
+  if(st.list.length){ const o=ensureOrder(); if(o.length) return openCam(o[0],true); }
+  toast("📷 Escolha uma loja (ou monte a lista) e toque aqui para ver o caminho na câmera.",3200);
+};
+
+/* ---------- telas do painel ---------- */
+const leaseLink = s => { const n=(window.MM_CONFIG&&MM_CONFIG.whatsLocacao)||""; return n ? "https://wa.me/"+String(n).replace(/\D/g,"")+"?text="+encodeURIComponent(`Olá! Tenho interesse no box disponível: ${s.loc} (${BUILD[s.b].name}).`) : ""; };
+const storeURL = s => location.origin+location.pathname+"?loja="+encodeURIComponent(s.s);
+async function shareStore(s){
+  const url=storeURL(s), data={title:s.n+" · Shopping Gallo",text:`${s.n} — ${locTxt(s).replace(/<[^>]+>/g,"")}`,url};
+  try{ if(navigator.share){ await navigator.share(data); return; } }catch(e){ if(e&&e.name==="AbortError") return; }
+  try{ await navigator.clipboard.writeText(url); toast("🔗 Link copiado! Cole no WhatsApp ou Instagram.",2500); }
+  catch(e){ prompt("Copie o link da loja:",url); }
+}
+const gmaps = a => "https://www.google.com/maps/dir/?api=1&destination="+encodeURIComponent(a);
+const wa = n => { let d=String(n).replace(/\D/g,""); if(d.length<=11) d="55"+d; return "https://wa.me/"+d; };
+const ig = v => /^https?:/.test(v) ? v : "https://www.instagram.com/"+String(v).replace(/^@/,"")+"/";
+function itemHTML(s,d){
+  const inl=st.list.includes(s.s);
+  return `<div class="item" data-id="${s.id}"><span class="ico" style="background:${tint(s)}">${s.icon}</span>
+    <div class="mid"><div class="n">${s.dest?'<span class="star">★</span> ':""}${esc(s.n)}</div><div class="l">${locTxt(s)}${s.vaga?" · 🔑 para alugar":""}${s.promo?" · 🏷️ promoção":""}</div></div>
+    <div class="rt"><span class="dist">${mTxt(d)}</span><button class="add ${inl?"in":""}" data-add="${s.id}" aria-label="${inl?"Remover da lista":"Adicionar à lista"}">${inl?"✓":"＋"}</button></div></div>`;
+}
+function foot(){
+  const g=G[st.g];
+  return `<div class="note">Dados do Shopping Gallo${INFO.date?` (${INFO.date})`:""}${INFO.src==="online"?" · atualizados pelos lojistas":INFO.src==="offline"?" · modo offline":""}. ${g&&g.custom?"Planta desenhada sobre o mapa do prédio.":"Planta esquemática: corredores e ordem das lojas seguem os endereços oficiais; distâncias estimadas."}${MM.online()?` · <a href="admin.html">Painel do lojista</a>`:""}</div>`;
+}
+function viewHome(){
+  $("st").textContent="O que você procura?"; $("sm").textContent=`${STORES.length} lojas`;
+  const c={}; STORES.forEach(s=>s.cats.forEach(x=>c[x]=(c[x]||0)+1));
+  const D=allDist(), near=STORES.filter(s=>s.cats.some(x=>x!=="Serviços")).sort((a,b)=>D.get(a.id)-D.get(b.id)).slice(0,5);
+  const intro = lsGet("mm_intro",false) ? "" : `<div class="intro"><b>Como usar</b><ol><li>Escolha o que procura (ou digite na busca).</li><li>Toque em <b>＋</b> para juntar várias lojas na <b>Minha lista</b>.</li><li>Siga a linha azul no mapa — ou use a <b>câmera</b>.</li></ol><button class="btn sm" id="introok">Entendi</button></div>`;
+  $("sb").innerHTML = intro + `<h3>Escolha um tipo de loja</h3><div class="grid">${SEGS.filter(([x])=>c[x]).map(([x])=>`<button class="cat" data-cat="${esc(x)}"><div class="e" style="background:${MM.SEGCOLOR[x]}2b">${MM.iconOf(x)}</div><b>${esc(x)}</b><small>${c[x]} lojas</small></button>`).join("")}</div>`
+    + `<h3>Mais perto de ${fromPos()?"você":"entrada deste piso"}</h3>${near.map(s=>itemHTML(s,D.get(s.id))).join("")}`
+    + (fromPos()?"":`<div class="warn">📍 Marque onde você está (botão no mapa ou aba “Onde estou”) para a lista mostrar o que está realmente perto de você.</div>`) + foot();
+  const ok=$("introok"); if(ok) ok.onclick=()=>{ lsSet("mm_intro",true); renderSheet(); };
+}
+function viewResults(){
+  const D=allDist(), all=STORES.filter(match).sort((a,b)=>(D.get(a.id)-(a.dest?25:0))-(D.get(b.id)-(b.dest?25:0)));
+  const here=all.filter(s=>s.g===st.g).length;
+  $("st").textContent=`${all.length} loja${all.length!==1?"s":""} encontrada${all.length!==1?"s":""}`; $("sm").textContent=`${here} neste andar`;
+  if(!all.length){ $("sb").innerHTML=`<div class="empty">Nada encontrado. Tente outro nome, um produto (biquíni, jeans, tênis…) ou o número da loja.<br><br><button class="btn sm" id="clr">Limpar busca</button></div>`+foot(); $("clr").onclick=()=>{ $("q").value=""; st.q=""; st.seg=null; st.view="home"; refresh(true); }; return; }
+  $("sb").innerHTML=(match.fuzzy?`<div class="promo" style="margin:0 0 6px">🔎 Não achamos exatamente “${esc(st.q.trim())}”. Mostrando resultados parecidos.</div>`:"")+`<div class="note" style="margin:0 0 4px">Ordenadas da mais perto à mais longe, a partir da ${refLabel()}.</div>`
+    + all.slice(0,st.more).map(s=>itemHTML(s,D.get(s.id))).join("")
+    + (all.length>st.more?`<button class="btn" id="more" style="width:100%;margin-top:10px">Ver mais ${Math.min(60,all.length-st.more)} lojas</button>`:"") + foot();
+  const m=$("more"); if(m) m.onclick=()=>{ st.more+=60; const sc=$("sb").scrollTop; renderSheet(); $("sb").scrollTop=sc; };
+}
+function viewStore(){
+  const s=STORES[st.sel], B=BUILD[s.b], lg=MM.leg(G,fromPos(),s,"De onde você está,"), inl=st.list.includes(s.s);
+  $("st").textContent="Como chegar · "+s.n; $("sm").innerHTML=`<button class="btn sm" id="back" style="height:34px">← Voltar</button>`;
+  $("sb").innerHTML=`<div class="card"><div class="row" style="gap:10px;flex-wrap:nowrap;align-items:flex-start"><span class="ico" style="background:${tint(s)};width:52px;height:52px;font-size:28px">${s.icon}</span><div><h2>${s.dest?'<span class="star">★</span> ':""}${esc(s.n)}</h2>
+    <div class="loc">${esc(B.name)} · ${FLOORS[s.f]} · ${esc(s.cor)}${s.num?` · Loja ${esc(s.num)}`:""}</div></div></div>
+    <div class="dsum">🚶 ${mTxt(lg.m)} · ${minTxt(lg.m)}</div>
+    <div class="btns"><button class="btn b" id="camb">📷 Ver o caminho na câmera</button><button class="btn g ${inl?"in":""}" id="addb">${inl?"✓ Na minha lista":"＋ Adicionar à minha lista"}</button></div>
+    <div class="stepsbox"><b>Passo a passo</b><ol class="steps">${lg.steps.map(t=>`<li>${t}</li>`).join("")}</ol></div>
+    ${lg.warn?`<div class="warn">⚠️ ${lg.warn}</div>`:""}
+    ${s.vaga?`<div class="promo" style="background:#fff1c2">🔑 <b>Box disponível para locação.</b>${s.locacao?" "+esc(s.locacao):""}${leaseLink(s)?`<br><a class="btn sm w" style="margin-top:8px" id="lease" href="${leaseLink(s)}" target="_blank" rel="noopener">Tenho interesse ↗</a>`:""}</div>`:""}
+    ${s.promo?`<div class="promo">🏷️ ${esc(s.promo)}</div>`:""}${s.desc?`<div class="desc">${esc(s.desc)}</div>`:""}
+    <div class="tags">${s.cats.map(c=>`<span class="tag" style="border-left:3px solid ${SEGCOLOR[c]||"#999"}">${MM.iconOf(c)} ${esc(c)}</span>`).join("")}</div>
+    <div class="btns">
+      <button class="btn sm" id="share">🔗 Compartilhar</button>
+      <button class="btn sm" id="here">📍 Estou nesta loja</button>
+      ${s.whats?`<a class="btn sm w" id="wa" href="${wa(s.whats)}" target="_blank" rel="noopener">WhatsApp ↗</a>`:""}
+      ${s.insta?`<a class="btn sm" href="${esc(ig(s.insta))}" target="_blank" rel="noopener">Instagram ↗</a>`:""}
+      
+      <a class="btn sm" href="${gmaps(B.name+", "+B.addr)}" target="_blank" rel="noopener">Chegar ao prédio ↗</a></div>
+    <div class="note">Endereço oficial: ${esc(s.loc)}</div></div>`;
+  $("sb").scrollTop=0;
+  $("camb").onclick=()=>openCam(s,false);
+  $("addb").onclick=()=>toggleList(s.id);
+  $("here").onclick=()=>meAtStore(s.id);
+  $("share").onclick=()=>shareStore(s);
+  const ls=$("lease"); if(ls) ls.onclick=()=>MM.track("locacao",{loja:s.s});
+  const w=$("wa"); if(w) w.onclick=()=>MM.track("whats",{loja:s.s});
+  $("back").onclick=backFromStore;
+}
+function viewList(){
+  const order=ensureOrder(), n=order.length;
+  $("st").textContent=`Minha lista${n?` (${n})`:""}`; $("sm").textContent=n?"do mais perto ao mais longe":"";
+  if(!n){ $("sb").innerHTML=`<div class="empty"><b>Sua lista está vazia.</b><br>Toque em <b>＋</b> nas lojas que quer visitar. O app mostra a ordem mais curta, começando pela mais perto de você, e desenha o caminho de uma loja até a outra.<br><br><button class="btn g" id="go">🔎 Escolher lojas</button></div>`; $("go").onclick=()=>{ st.view=filtering()?"results":"home"; refresh(); }; return; }
+  const legs=planList(), total=legs.reduce((a,l)=>a+l.m,0);
+  $("sb").innerHTML=`<div class="dsum">🚶 Total ${mTxt(total)} · ${minTxt(total)}</div>
+    <div class="note" style="margin:2px 0 4px">Ordem a partir da ${refLabel()}.${st.manual?" Você mudou a ordem.":""}</div>
+    <div class="btns" style="margin:6px 0"><button class="btn b" id="lcam">📷 Seguir na câmera</button><button class="btn sm" id="lopt">↻ Mais perto primeiro</button><button class="btn sm" id="lclr">🗑 Limpar</button></div>`
+    + order.map((s,i)=>`<div class="stop"><span class="num">${i+1}</span><div class="mid" data-id="${s.id}"><div class="n">${s.icon} ${esc(s.n)}</div><div class="l">${locTxt(s)} · ${mTxt(legs[i].m)}${i?" da anterior":""}</div></div>
+        <button class="mini" data-mv="${i}|-1" aria-label="Subir" ${i?"":"disabled"}>▲</button><button class="mini" data-mv="${i}|1" aria-label="Descer" ${i<n-1?"":"disabled"}>▼</button><button class="mini" data-rm="${s.id}" aria-label="Remover">✕</button></div>
+        <details class="sp"><summary>Como chegar</summary><ol class="steps">${legs[i].steps.map(t=>`<li>${t}</li>`).join("")}</ol></details>`).join("")
+    + (legs[0]&&legs[0].warn?`<div class="warn">⚠️ ${legs[0].warn}</div>`:"") + `<div class="btns"><button class="btn sm" id="lfit">🗺️ Ver no mapa</button></div>`;
+  $("lcam").onclick=()=>openCam(order[0],true);
+  $("lopt").onclick=()=>{ st.manual=false; lsSet("mm_manual",false); st.okey=""; refresh(); toast("Ordenada pelo mais perto de você",1800); };
+  $("lclr").onclick=()=>{ st.list=[]; st.manual=false; lsSet("mm_list",[]); lsSet("mm_manual",false); st.okey=""; refresh(); };
+  $("lfit").onclick=()=>{ setSheet("peek"); const f=order.find(s=>s.g===st.g)||order[0]; if(f.g!==st.g) showGroup(f.g,false); fit(); };
+}
+function viewMe(){
+  const m=fromPos(); $("st").textContent="Onde estou"; $("sm").textContent=m?"posição marcada":"";
+  const where = m ? `${BUILD[G[m.g].b].name} · ${FLOORS[G[m.g].f]}` : "";
+  $("sb").innerHTML=`<div class="card">${m?`<div class="dsum">📍 ${esc(where)}</div><div class="note" style="margin-top:2px">Marcada ${{mapa:"no mapa",qr:"por QR Code",loja:"em uma loja",cam:"pela câmera",entrada:"na entrada"}[m.how]||""}. As rotas e as distâncias saem daqui.</div>`
+      :`<div class="warn">Você ainda não marcou onde está. Sem isso, as rotas e as distâncias partem da entrada do andar.</div>`}
+    <h3>Como dizer ao app onde você está</h3>
+    <div class="btns" style="flex-direction:column;align-items:stretch">
+      <button class="btn g" id="mk">📍 Marcar no mapa</button>
+      <div class="note" style="margin:0 0 6px"><b>QR Code:</b> aponte a câmera do celular para a etiqueta fixada no corredor — o app abre já com a sua posição.</div>
+      <button class="btn" id="gpsb">📡 ${st.gps?"Atualizar GPS":"Usar o GPS para achar o prédio"}</button>
+      ${m?`<button class="btn sm" id="mclr">Limpar minha posição</button>`:""}
+    </div>${st.gpsMsg?`<div class="warn">${esc(st.gpsMsg)}</div>`:""}${st.gps?gpsInfo():""}</div>${foot()}`;
+  $("mk").onclick=()=>{ setMarking(true); }; $("gpsb").onclick=startGPS;
+  const c=$("mclr"); if(c) c.onclick=()=>{ st.me=null; saveMe(); refresh(); };
+  const cal=$("cal"); if(cal) cal.onclick=calibrate;
+}
+function gpsInfo(){
+  return `<h3>GPS · precisão ±${Math.round(st.gps.acc)} m</h3>${BORDER.map(k=>{ const B=BUILD[k], d=MM.hav(st.gps.lat,st.gps.lng,B.lat,B.lng); return `<div class="item" style="cursor:default"><span class="ico" style="background:#e8f3f4">🏢</span><div class="mid"><div class="n">${B.name}</div><div class="l">${d>1000?(d/1000).toFixed(1)+" km":Math.round(d)+" m"} ${B.cal?"(calibrado)":"(coordenada aproximada)"}</div></div><a class="dist" href="${gmaps(B.name+", "+B.addr)}" target="_blank" rel="noopener">Rota ↗</a></div>`; }).join("")}
+    <div class="btns"><button class="btn sm" id="cal">🎯 Estou na entrada do ${BUILD[G[st.g].b].short}</button></div>
+    <div class="note">“Estou na entrada” grava o GPS atual como a posição do prédio aberto no mapa, só neste aparelho. O administrador pode gravar para todos no painel.</div>`;
+}
+function renderSheet(){
+  if (st.view==="store" && st.sel!=null) return viewStore();
+  if (st.view==="list") return viewList();
+  if (st.view==="me") return viewMe();
+  if (filtering()) { st.view="results"; return viewResults(); }
+  st.view="home"; return viewHome();
+}
+$("sb").onclick=e=>{
+  const a=e.target.closest("[data-add]"); if(a){ e.stopPropagation(); toggleList(+a.dataset.add); return; }
+  const mv=e.target.closest("[data-mv]"); if(mv){ const [i,d]=mv.dataset.mv.split("|").map(Number); moveStop(i,d); return; }
+  const rm=e.target.closest("[data-rm]"); if(rm){ const s=STORES[+rm.dataset.rm]; const i=st.list.indexOf(s.s); if(i>=0){ st.list.splice(i,1); st.okey=""; lsSet("mm_list",st.list); } markBar(); draw(); renderSheet(); return; }
+  const c=e.target.closest("[data-cat]"); if(c){ st.seg=c.dataset.cat; st.sel=null; st.view="results"; st.more=60; refresh(true); $("sb").scrollTop=0; return; }
+  const it=e.target.closest("[data-id]"); if(it) selectStore(+it.dataset.id);
+};
+let qt,tt; $("q").oninput=e=>{ clearTimeout(qt); clearTimeout(tt); const v=e.target.value;
+  qt=setTimeout(()=>{ st.q=v; st.sel=null; st.view=filtering()?"results":"home"; st.more=60; if(st.sheet==="peek") setSheet("mid"); refresh(true); $("sb").scrollTop=0; },160);
+  tt=setTimeout(()=>{ const t=v.trim(); if(t.length>=2) MM.track("busca",{termo:MM.norm(t),n:STORES.filter(match).length}); },1800); };
+function refresh(jump){
+  match = MM.matcher(STORES, st.q, st.seg);
+  renderFilter(); renderTabs();
+  if (jump && filtering() && !G[st.g].stores.some(match)){ const f=STORES.find(match); if(f) showGroup(f.g,true); }
+  draw(); renderSheet(); markBar();
+}
+
+/* ---------- GPS ---------- */
+try{ const c=lsGet("mm_cal",{}); for(const k in c) if(BUILD[k]) Object.assign(BUILD[k],c[k],{cal:true}); }catch(e){}
+function startGPS(){
+  st.view="me"; if(st.sheet==="peek") setSheet("mid");
+  if (!("geolocation" in navigator)){ st.gpsMsg="Este navegador não tem GPS."; return refresh(); }
+  if (st.watch) { renderSheet(); return; }
+  st.gpsMsg="Procurando sua localização…"; refresh();
+  try{ st.watch=navigator.geolocation.watchPosition(p=>{
+    st.gps={lat:p.coords.latitude,lng:p.coords.longitude,acc:p.coords.accuracy};
+    let best=null; for(const k of BORDER){ const d=MM.hav(st.gps.lat,st.gps.lng,BUILD[k].lat,BUILD[k].lng); if(!best||d<best.d) best={k,d}; }
+    st.gpsB=best; const inside=best.d<120+Math.min(st.gps.acc,80);
+    $("gps").classList.add("on");
+    st.gpsMsg=inside?`📍 Você está no ${BUILD[best.k].name} (±${Math.round(st.gps.acc)} m).`:`Você está a ${best.d>1000?(best.d/1000).toFixed(1)+" km":Math.round(best.d)+" m"} do ${BUILD[best.k].name}.`;
+    if (inside && !st.auto){ st.auto=true; const k=G[best.k+"|T"]?best.k+"|T":Object.keys(G).find(x=>x.startsWith(best.k)); if(k && G[st.g].b!==best.k) showGroup(k,true); }
+    if (st.view==="me") renderSheet();
+  }, err=>{ st.watch=null; st.gpsMsg=err.code===1?"A permissão de localização foi negada ou está bloqueada nesta janela. No site publicado (HTTPS), permita o acesso ao local.":"Não foi possível obter o GPS agora."; $("gps").classList.remove("on"); if(st.view==="me") renderSheet(); }, {enableHighAccuracy:true,maximumAge:5000,timeout:20000}); }
+  catch(e){ st.gpsMsg="GPS indisponível nesta janela."; refresh(); }
+}
+$("gps").onclick=startGPS;
+function calibrate(){
+  const g=G[st.g], k=g.b; Object.assign(BUILD[k],{lat:st.gps.lat,lng:st.gps.lng,cal:true});
+  const c=lsGet("mm_cal",{}); c[k]={lat:st.gps.lat,lng:st.gps.lng}; lsSet("mm_cal",c);
+  const t=G[k+"|T"]||g; st.me={g:t.key,x:t.entry.x,y:t.entry.y,how:"entrada"}; saveMe(); refresh();
+}
+
+/* ---------- tema claro / escuro ---------- */
+function applyTheme(t,redraw){
+  document.documentElement.dataset.theme=t; MM.dark=(t==="dark"); lsSet("mm_theme",t);
+  const m=document.querySelector('meta[name=theme-color]'); if(m) m.content=t==="dark"?"#3a0f19":"#6b1c2b";
+  if(redraw && G[st.g]) draw();
+}
+MM.dark = document.documentElement.dataset.theme==="dark";
+$("th").onclick=()=>applyTheme(MM.dark?"light":"dark",true);
+
+/* ---------- instalar (PWA) ---------- */
+let deferred=null;
+window.addEventListener("beforeinstallprompt",e=>{ e.preventDefault(); deferred=e; $("inst").style.display="grid"; });
+$("inst").onclick=async()=>{ if(!deferred) return; deferred.prompt(); try{ await deferred.userChoice; }catch(e){} deferred=null; $("inst").style.display="none"; };
+if ("serviceWorker" in navigator && location.protocol==="https:" && window.top===window) navigator.serviceWorker.register("sw.js").catch(()=>{});
+
+/* ---------- início ---------- */
+function boot(data){
+  const keep = st.sel!=null && STORES[st.sel] ? STORES[st.sel].s : null;
+  INFO={src:data.src,date:data.date};
+  if (data.layouts && data.layouts.predios) for(const k in data.layouts.predios) if(BUILD[k] && !BUILD[k].cal) Object.assign(BUILD[k],data.layouts.predios[k]);
+  const b=MM.build(data.stores,data.layouts); STORES=b.stores; G=b.G;
+  if (st.me && !G[st.me.g]) st.me=null;
+  st.list=st.list.filter(sl=>STORES.some(s=>s.s===sl)); st.okey="";
+  st.sel=null; st.view="home"; st.g = st.me ? st.me.g : (G["shopping|T"]?"shopping|T":MM.groupOrder(G)[0]);
+  match=MM.matcher(STORES,st.q,st.seg);
+  $("v3").classList.toggle("on",st.v3); $("v3").textContent=st.v3?"2D":"3D"; $("mapwrap").classList.toggle("v3",st.v3);
+  showGroup(st.g,false); refresh(); requestAnimationFrame(()=>{ initialView(); applyHash(); applyLink(keep); });
+}
+/* visão inicial: perto do usuário ou da entrada, já legível (o botão ⤢ mostra o andar inteiro) */
+function initialView(){
+  const g=G[st.g]; if(!g) return;
+  if (filtering()) return fit();
+  const m=fromPos(); if (m && m.g===st.g) return centerOn(m.x,m.y,440);
+  centerOn(g.entry.x+(g.b==="park"?110:210),g.entry.y+(g.b==="park"?240:150),g.b==="park"?420:500);
+}
+/* link direto: ?loja=slug  (também aceita o nome, sem acento) */
+let linkDone=false;
+function applyLink(keep){
+  let slug=keep;
+  if(!slug && !linkDone){ linkDone=true; try{ slug=new URLSearchParams(location.search).get("loja"); }catch(e){} if(slug) MM.track("link",{loja:String(slug).slice(0,100)}); }
+  if(!slug) return;
+  const q=MM.slugify(slug), s=STORES.find(x=>x.s===slug)||STORES.find(x=>MM.slugify(x.s)===q)||STORES.find(x=>MM.slugify(x.n)===q);
+  if(!s){ if(!keep) toast("Não encontramos essa loja. Use a busca.",3500); return; }
+  st.back="home"; selectStore(s.id,true,!!keep); setSheet("mid");
+}
+window.addEventListener("resize",fit);
+boot({stores:MM.embedded(),layouts:{},src:"embutido",date:window.MM_DATE||""});
+MM.load().then(d=>{ if(d.src!=="embutido"||Object.keys(d.layouts).length) boot(d); MM.track("abrir"); });
+</script>
+</body>
+</html>

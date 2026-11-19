@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Painel · Mapa Shopping Gallo</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f7f1ee;--panel:#fff;--ink:#2a1519;--mut:#7a5a60;--line:#eadad7;--acc:#b8283f;--acc2:#6b1c2b;--corr:#efe3df;--store:#fff;--me:#1a73e8}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Roboto,system-ui,sans-serif}
+header{display:flex;align-items:center;gap:8px;padding:10px 12px;background:linear-gradient(135deg,#6b1c2b,#3a0f19);color:#fff;border-bottom:3px solid #ff8a1e}header .btn{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25);color:#fff}
+.logo{width:30px;height:30px;border-radius:8px;background:var(--acc);color:#fff;display:grid;place-items:center;font-weight:800;font-size:13px}
+h1{font-size:15px;margin:0;font-weight:900;text-transform:uppercase}h1 small{display:block;font-size:11.5px;color:#d6d4f5;font-weight:500;text-transform:none}
+header .r{margin-left:auto;display:flex;gap:6px;align-items:center}
+nav{display:flex;gap:6px;padding:6px 12px;background:var(--panel);border-bottom:1px solid var(--line);overflow-x:auto}
+.tab{flex:none;font-size:13px;font-weight:700;padding:7px 11px;border-radius:8px;cursor:pointer;color:var(--mut);border:1px solid transparent}
+.tab.on{color:#fff;background:#6b1c2b;border-color:#6b1c2b}
+main{padding:12px;max-width:920px;margin:0 auto}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+h2{font-size:16px;margin:0 0 8px}h3{font-size:13px;margin:14px 0 6px}
+label{display:block;font-size:12px;font-weight:700;color:var(--mut);margin:10px 0 4px}
+input[type=text],input[type=email],input[type=password],input[type=number],input[type=search],textarea,select{width:100%;font:inherit;font-size:15px;padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:#fff}
+textarea{min-height:76px;resize:vertical}
+.btn{font:inherit;font-size:13px;font-weight:800;padding:9px 12px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer;color:var(--ink);text-decoration:none;display:inline-block}
+.btn.p{background:var(--acc);border-color:var(--acc);color:#fff}.btn.d{color:var(--acc)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.mut{color:var(--mut);font-size:12.5px;line-height:1.45}
+.msg{font-size:13px;font-weight:700;margin-top:8px}.msg.ok{color:#1b7f43}.msg.er{color:var(--acc)}
+.item{display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.item .n{font-weight:700;font-size:14px}.item .l{font-size:12px;color:var(--mut)}.item .go{margin-left:auto;font-size:11px;font-weight:800;color:var(--acc2)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px}.kpi b{display:block;font-size:22px}.kpi span{font-size:12px;color:var(--mut);font-weight:700}
+.bars{display:flex;align-items:flex-end;gap:2px;height:90px;margin-top:6px}
+.bars div{flex:1;background:var(--acc2);border-radius:3px 3px 0 0;min-height:2px}
+.rank div{display:flex;gap:8px;font-size:13px;padding:5px 0;border-bottom:1px solid var(--line)}.rank b{margin-left:auto}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+#edwrap{position:relative;height:56vh;min-height:320px;border:1px solid var(--line);border-radius:12px;overflow:hidden;touch-action:none;background:#fbf8f3}
+#ed{width:100%;height:100%;display:block;user-select:none}
+.qrs{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.qr{background:#fff;border:1px solid #222;border-radius:10px;padding:10px;text-align:center;break-inside:avoid}
+.qr svg,.qr img{width:100%;height:auto;max-width:170px}
+.qr b{display:block;font-size:14px;margin-top:4px}.qr span{display:block;font-size:11px;color:#444}
+.hide{display:none!important}
+@media print{header,nav,.noprint{display:none!important}main{max-width:none;padding:0}.box{border:0;padding:0}body{background:#fff}.qrs{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">G</div>
+  <h1>Painel Shopping Gallo<small id="who">carregando…</small></h1>
+  <div class="r"><a class="btn" href="index.html">Abrir mapa</a><button class="btn hide" id="out">Sair</button></div>
+</header>
+<nav id="tabs" class="hide"></nav>
+<main>
+  <!-- login -->
+  <section class="box hide" id="auth">
+    <h2>Entrar</h2>
+    <label>E-mail</label><input type="email" id="em" autocomplete="email">
+    <label>Senha</label><input type="password" id="pw" autocomplete="current-password">
+    <div class="row"><button class="btn p" id="login">Entrar</button><button class="btn" id="signup">Criar conta</button></div>
+    <div class="msg" id="amsg"></div>
+    <p class="mut">Lojista: crie sua conta e informe o e-mail à administração para vincular sua loja.</p>
+  </section>
+
+  <!-- minha loja -->
+  <section class="hide" id="v-minha"></section>
+
+  <!-- lojas (admin) -->
+  <section class="hide" id="v-lojas">
+    <div class="box"><h2>Lojas e boxes</h2><input type="search" id="lq" placeholder="Buscar loja por nome, via ou número">
+      <div class="row" style="margin:8px 0 0"><label style="margin:0"><input type="checkbox" id="lvagas"> Somente boxes vagos</label><button class="btn" id="lnew" style="margin-left:auto">＋ Novo box vago</button></div>
+      <div id="nform" class="hide" style="margin-top:8px"><label>Endereço do box (mesmo formato das lojas: Via – Piso (Loja))</label><input type="text" id="nloc" placeholder="Rua 03 – Térreo (Loja 125)"><label>Informações para o interessado (opcional)</label><input type="text" id="ninfo" maxlength="300" placeholder="Ex.: 12 m², esquina, 2 vagas de estoque"><div class="row"><button class="btn p" id="nsave">Criar box vago</button></div><div class="msg" id="nmsg"></div></div>
+      <div id="llist"></div></div>
+    <div id="lform"></div>
+    <div class="box"><h2>Dados de exemplo</h2><p class="mut" style="margin-top:0">Carrega no banco as lojas da Shopping Gallo (nome, segmentos e endereço) para demonstrar o sistema. Lojas que já existem <b>não são alteradas</b>.</p>
+      <div class="row"><button class="btn" id="demo">Carregar lojas de exemplo da Shopping Gallo</button></div><div class="msg" id="demomsg"></div></div>
+    <div class="box"><h2>Importar planilha (CSV)</h2>
+      <p class="mut" style="margin-top:0">Exporte do Excel/Google Sheets como CSV (separador vírgula ou ponto e vírgula). Colunas aceitas: <b>nome, localizacao, categorias, produtos, descricao, whatsapp, instagram, promo, destaque, status</b> (status: <i>vaga</i> ou <i>ocupada</i>) e, opcionalmente, <b>slug</b>. Lojas já existentes (mesmo slug) são atualizadas e células vazias não apagam dados.</p>
+      <div class="row"><input type="file" id="csvf" accept=".csv,text/csv" style="flex:1"><a class="btn" id="csvmodel" download="modelo-lojas.csv">Baixar modelo</a></div>
+      <div id="csvprev" class="mut" style="margin-top:8px"></div><div class="row"><button class="btn p hide" id="csvgo">Importar</button></div><div class="msg" id="csvmsg"></div></div>
+  </section>
+
+  <!-- estatísticas -->
+  <section class="hide" id="v-stats">
+    <div class="box"><div class="row" style="margin:0"><h2 style="margin:0">Uso do app</h2>
+      <select id="dias" style="width:auto;margin-left:auto"><option value="7">7 dias</option><option value="30" selected>30 dias</option><option value="90">90 dias</option></select></div>
+      <div id="sbody" class="mut" style="margin-top:10px">Carregando…</div></div>
+  </section>
+
+  <!-- planta -->
+  <section class="hide" id="v-planta">
+    <div class="box">
+      <h2>Planta do piso</h2>
+      <p class="mut noprint">Envie a foto/planta oficial do piso como fundo e arraste cada corredor (bolinhas nas pontas, ou o corredor inteiro) para cima do desenho. As lojas se distribuem sozinhas ao longo do corredor, pela ordem dos números. Encoste as pontas umas nas outras, ou use “＋ Ligação”, para as rotas conectarem.</p>
+      <div class="row"><select id="pg" style="flex:1;min-width:180px"></select>
+        <label class="btn" style="margin:0;color:var(--ink)">🖼 Imagem de fundo<input type="file" id="bgf" accept="image/*" class="hide"></label>
+        <button class="btn" id="addk">＋ Ligação</button><button class="btn" id="pfit">⤢</button></div>
+      <div id="edwrap" style="margin-top:10px"><svg id="ed" xmlns="http://www.w3.org/2000/svg"></svg></div>
+      <div id="segp" class="mut" style="margin-top:8px">Toque em um corredor para ver opções (escala em metros, renomear/excluir ligações).</div>
+      <h3 style="margin:14px 0 6px">Marcos de referência (banheiro, escada, elevador…)</h3>
+      <div class="row"><select id="mt" style="width:auto"></select><button class="btn" id="mput">＋ Colocar no mapa</button><span class="mut" id="mhint">Escolha o tipo, clique no botão e toque no mapa onde fica.</span></div>
+      <div id="mlist" style="margin-top:6px"></div>
+      <div class="row">
+        <label style="margin:0">Tamanho das lojas <input type="range" id="dep" min="10" max="60"></label>
+        <label style="margin:0">Largura do corredor <input type="range" id="cwr" min="6" max="50"></label>
+        <button class="btn" id="rmbg">Remover imagem</button>
+      </div>
+      <div class="row"><button class="btn p" id="psave">Salvar planta</button><button class="btn d" id="preset">Voltar ao esquemático</button><button class="btn" id="pexp">Exportar layout.json</button></div>
+      <div class="msg" id="pmsg"></div>
+      <textarea id="pjson" class="hide" readonly style="margin-top:8px;font-size:11px;min-height:120px"></textarea>
+    </div>
+    <div class="box"><h2>GPS do prédio</h2>
+      <p class="mut">Estando na entrada do prédio selecionado acima, grave o GPS do seu celular como a posição dele para todos os usuários.</p>
+      <div class="row"><button class="btn" id="pgps">📡 Gravar meu GPS como entrada deste prédio</button></div><div class="msg" id="gmsg"></div></div>
+  </section>
+
+  <!-- QR -->
+  <section class="hide" id="v-qr">
+    <div class="box noprint"><h2>QR Codes de posição</h2>
+      <p class="mut">Imprima e cole cada etiqueta no ponto indicado do corredor. Quem aponta a câmera abre o mapa já com “você está aqui” naquele ponto — é o que dá precisão dentro do prédio, onde o GPS não alcança.</p>
+      <label>Piso</label><select id="qg"></select>
+      <label>Endereço do app publicado</label><input type="text" id="qbase">
+      <div class="row"><button class="btn p" id="qprint">Imprimir</button></div></div>
+    <div class="box"><div class="qrs" id="qrs"></div></div>
+  </section>
+</main>
+<script src="config.js"></script>
+<script src="lojas-data.js"></script>
+<script src="core.js"></script>
+<script>
+"use strict";
+const $ = id => document.getElementById(id), esc = MM.esc;
+let sb = null, user = null, papel = null, RAW = [], LAY = {}, built = null, ALL = [];
+const loadScript = src => new Promise((ok, no) => { const s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = () => no(new Error("Falha ao carregar " + src)); document.head.appendChild(s); });
+const msg = (el, t, ok) => { el.textContent = t; el.className = "msg " + (ok ? "ok" : "er"); };
+const rebuild = () => { built = MM.build(RAW, LAY); };
+const gname = k => { const g = built.G[k]; return MM.BUILD[g.b].name + " · " + MM.FLOORS[g.f]; };
+
+/* ---------- sessão ---------- */
+async function init() {
+  const d = await MM.load(); RAW = d.stores; LAY = d.layouts || {}; rebuild();
+  if (!MM.online()) { papel = "local"; $("who").textContent = "modo local (sem Supabase) — planta e QR Codes"; return showApp(); }
+  try { await loadScript("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"); }
+  catch (e) { $("who").textContent = "sem conexão com o Supabase"; return; }
+  sb = supabase.createClient(MM.cfg.url, MM.cfg.key);
+  const { data } = await sb.auth.getSession();
+  await setSession(data.session);
+  sb.auth.onAuthStateChange((ev, s) => { setTimeout(() => setSession(s), 0); });
+}
+let lastUid;
+async function setSession(s) {
+  const uid = s && s.user ? s.user.id : null;
+  if (uid === lastUid) return; lastUid = uid; user = s ? s.user : null;
+  if (!user) { papel = null; $("tabs").classList.add("hide"); $("out").classList.add("hide"); document.querySelectorAll("main>section").forEach(x => x.classList.add("hide")); $("auth").classList.remove("hide"); $("who").textContent = "acesso de lojistas e administração"; return; }
+  const { data } = await sb.from("perfis").select("papel").eq("user_id", user.id).maybeSingle();
+  papel = data && data.papel === "admin" ? "admin" : "lojista";
+  $("who").textContent = user.email + " · " + (papel === "admin" ? "administrador" : "lojista");
+  $("out").classList.remove("hide"); $("auth").classList.add("hide"); showApp();
+}
+$("login").onclick = async () => { const { error } = await sb.auth.signInWithPassword({ email: $("em").value.trim(), password: $("pw").value }); if (error) msg($("amsg"), "Não foi possível entrar: " + error.message); };
+$("signup").onclick = async () => {
+  if ($("pw").value.length < 8) return msg($("amsg"), "Use uma senha com pelo menos 8 caracteres.");
+  const { data, error } = await sb.auth.signUp({ email: $("em").value.trim(), password: $("pw").value });
+  if (error) return msg($("amsg"), "Não foi possível criar a conta: " + error.message);
+  if (!data.session) msg($("amsg"), "Conta criada. Confirme pelo link enviado ao seu e-mail e depois entre.", true);
+};
+$("out").onclick = () => sb.auth.signOut();
+
+/* ---------- abas ---------- */
+const TABS = { minha: "Minha loja", lojas: "Lojas", stats: "Estatísticas", planta: "Planta", qr: "QR Codes" };
+function showApp() {
+  const list = papel === "admin" ? ["lojas", "stats", "planta", "qr"] : papel === "local" ? ["planta", "qr"] : ["minha"];
+  $("tabs").innerHTML = list.map(t => `<span class="tab" data-t="${t}">${TABS[t]}</span>`).join(""); $("tabs").classList.remove("hide");
+  go(list[0]);
+}
+$("tabs").onclick = e => { const t = e.target.closest(".tab"); if (t) go(t.dataset.t); };
+function go(t) {
+  document.querySelectorAll(".tab").forEach(x => x.classList.toggle("on", x.dataset.t === t));
+  for (const k in TABS) $("v-" + k).classList.toggle("hide", k !== t);
+  ({ minha: loadMinha, lojas: loadLojas, stats: loadStats, planta: openPlanta, qr: openQR })[t]();
+}
+
+/* ---------- formulário de loja ---------- */
+function formHTML(r, admin) {
+  const f = (id, lab, val, extra) => `<label>${lab}</label><input type="text" data-f="${id}" value="${esc(val || "")}" ${extra || ""}>`;
+  return `<div class="box" data-slug="${esc(r.slug)}"><h2>${esc(r.nome)}</h2><div class="mut">${esc(r.localizacao)}</div>
+    ${admin ? f("nome", "Nome", r.nome) + f("localizacao", "Endereço oficial (via – piso (loja))", r.localizacao) + f("categorias", "Segmentos (separados por vírgula)", (r.categorias || []).join(", ")) : ""}
+    <label>Descrição da loja (até 600 caracteres)</label><textarea data-f="descricao" maxlength="600">${esc(r.descricao || "")}</textarea>
+    ${f("produtos", "Produtos / palavras-chave para a busca (ex.: vestido midi, linho, tamanhos 36 ao 50)", r.produtos, 'maxlength="400"')}
+    ${f("promo", "Promoção em destaque (opcional)", r.promo, 'maxlength="140"')}
+    ${f("whatsapp", "WhatsApp com DDD (só números)", r.whatsapp, 'maxlength="20" inputmode="tel"')}
+    ${f("instagram", "Instagram (@usuario ou link)", r.instagram, 'maxlength="120"')}
+    ${admin ? `<label><input type="checkbox" data-f="destaque" ${r.destaque ? "checked" : ""}> Loja em destaque (★ no mapa e no topo das listas)</label>
+      <label><input type="checkbox" data-f="vaga" ${r.status === "vaga" ? "checked" : ""}> 🔑 Box disponível para locação (aparece dourado no mapa e na busca “alugar”)</label>
+      ${f("locacao_info", "Informações da locação (aparece no card do box)", r.locacao_info, 'maxlength="300"')}
+      <label>Vincular a um lojista (e-mail da conta) ${r.owner ? "— já vinculada" : ""}</label><div class="row" style="margin:0"><input type="email" data-f="email" style="flex:1" placeholder="lojista@email.com"><button class="btn" data-act="link">Vincular</button>${r.owner ? '<button class="btn d" data-act="unlink">Desvincular</button>' : ""}</div>` : ""}
+    <div class="row"><button class="btn p" data-act="save">Salvar</button></div><div class="msg"></div></div>`;
+}
+async function formAct(e, admin, after) {
+  const b = e.target.closest("[data-act]"); if (!b) return;
+  const box = b.closest(".box"), slug = box.dataset.slug, m = box.querySelector(".msg"), v = k => { const el = box.querySelector(`[data-f="${k}"]`); return el ? el.value.trim() : undefined; };
+  if (b.dataset.act === "save") {
+    const up = { descricao: v("descricao"), produtos: v("produtos"), promo: v("promo"), whatsapp: v("whatsapp").replace(/[^\d+ ()-]/g, ""), instagram: v("instagram") };
+    if (admin) Object.assign(up, { nome: v("nome"), localizacao: v("localizacao"), categorias: v("categorias").split(",").map(x => x.trim()).filter(Boolean), destaque: box.querySelector('[data-f="destaque"]').checked, status: box.querySelector('[data-f="vaga"]').checked ? "vaga" : "ocupada", locacao_info: v("locacao_info") });
+    const { data, error } = await sb.from("lojas").update(up).eq("slug", slug).select();
+    if (error || !data || !data.length) return msg(m, "Não foi possível salvar" + (error ? ": " + error.message : " (sem permissão para esta loja)."));
+    msg(m, "Salvo. As mudanças já aparecem no mapa.", true); if (after) after(data[0]);
+  } else {
+    const email = b.dataset.act === "unlink" ? "" : v("email");
+    if (b.dataset.act === "link" && !email) return msg(m, "Informe o e-mail da conta do lojista.");
+    const { data, error } = await sb.rpc("vincular_lojista", { p_slug: slug, p_email: email });
+    if (error) return msg(m, error.message); msg(m, "Loja " + data + ".", true); if (after) after(null);
+  }
+}
+
+/* ---------- minha loja ---------- */
+async function loadMinha() {
+  const el = $("v-minha"); el.innerHTML = `<div class="box mut">Carregando…</div>`;
+  const { data, error } = await sb.from("lojas").select("*").eq("owner", user.id).order("nome");
+  if (error) return el.innerHTML = `<div class="box msg er">${esc(error.message)}</div>`;
+  el.innerHTML = data.length ? data.map(r => formHTML(r, false)).join("")
+    : `<div class="box"><h2>Nenhuma loja vinculada</h2><p class="mut">Sua conta (<b>${esc(user.email)}</b>) ainda não está vinculada a uma loja. Informe este e-mail à administração do Shopping Gallo.</p></div>`;
+}
+$("v-minha").onclick = e => formAct(e, false);
+
+/* ---------- lojas (admin) ---------- */
+async function loadLojas() {
+  const { data, error } = await sb.from("lojas").select("*").order("nome");
+  if (error) return $("llist").innerHTML = `<div class="msg er">${esc(error.message)}</div>`;
+  ALL = data; listLojas();
+}
+function listLojas() {
+  const q = MM.norm($("lq").value).trim();
+  const so = $("lvagas").checked, r = ALL.filter(x => (!so || x.status === "vaga") && (!q || MM.norm(x.nome + " " + x.localizacao).includes(q))).slice(0, 30);
+  $("llist").innerHTML = r.map(x => `<div class="item" data-s="${esc(x.slug)}"><div><div class="n">${x.status === "vaga" ? "🔑 " : ""}${x.destaque ? "★ " : ""}${esc(x.nome)}</div><div class="l">${esc(x.localizacao)}${x.owner ? " · lojista vinculado" : ""}</div></div><button class="btn" data-q="${esc(x.slug)}" style="margin-left:auto">${x.status === "vaga" ? "Marcar ocupado" : "Marcar vago"}</button><span class="go">Editar →</span></div>`).join("")
+    + `<div class="mut" style="margin-top:8px">${ALL.length} lojas no banco (${ALL.filter(x => x.status === "vaga").length} vagas)${q || so ? "" : " — mostrando as 30 primeiras; use a busca"}.</div>`;
+}
+$("lq").oninput = listLojas; $("lvagas").onchange = listLojas;
+$("llist").onclick = async e => {
+  const qb = e.target.closest("[data-q]");
+  if (qb) { e.stopPropagation(); const r = ALL.find(x => x.slug === qb.dataset.q), st = r.status === "vaga" ? "ocupada" : "vaga";
+    const { data, error } = await sb.from("lojas").update({ status: st }).eq("slug", r.slug).select();
+    if (error || !data || !data.length) return alert("Não foi possível alterar: " + (error ? error.message : "sem permissão")); Object.assign(r, data[0]); return listLojas(); }
+  const it = e.target.closest(".item"); if (!it) return; const r = ALL.find(x => x.slug === it.dataset.s); $("lform").innerHTML = formHTML(r, true); $("lform").scrollIntoView({ behavior: "smooth" }); };
+$("lform").onclick = e => formAct(e, true, async row => { if (row) { const i = ALL.findIndex(x => x.slug === row.slug); if (i >= 0) ALL[i] = row; } else await loadLojas(); listLojas(); });
+
+/* ---------- dados de exemplo ---------- */
+$("demo").onclick = async () => {
+  const m = $("demomsg"), base = MM.embedded(); if (!confirm(`Carregar até ${base.length} lojas de exemplo? Lojas já existentes não serão alteradas.`)) return;
+  const rows = base.map(x => ({ slug: x.s, nome: x.n, categorias: x.c, localizacao: x.l })); let n = 0;
+  for (let i = 0; i < rows.length; i += 200) {
+    const { error } = await sb.from("lojas").upsert(rows.slice(i, i + 200), { onConflict: "slug", ignoreDuplicates: true });
+    if (error) return msg(m, `Parou após ${n}: ${error.message}`); n += Math.min(200, rows.length - i); msg(m, `Carregando… ${n}/${rows.length}`, true);
+  }
+  msg(m, "Pronto. As lojas de exemplo estão no banco e no mapa.", true); await loadLojas();
+};
+
+/* ---------- novo box vago ---------- */
+$("lnew").onclick = () => $("nform").classList.toggle("hide");
+$("nsave").onclick = async () => {
+  const loc = $("nloc").value.trim(), m = $("nmsg"); if (!loc) return msg(m, "Informe o endereço do box.");
+  const row = { slug: MM.slugify("vaga " + loc), nome: "Box disponível", localizacao: loc, categorias: [], status: "vaga", locacao_info: $("ninfo").value.trim().slice(0, 300) };
+  const { error } = await sb.from("lojas").insert(row);
+  if (error) return msg(m, error.code === "23505" ? "Já existe um box com esse endereço." : "Não foi possível criar: " + error.message);
+  msg(m, "Box vago criado. Ele já aparece no mapa.", true); $("nloc").value = ""; $("ninfo").value = ""; await loadLojas();
+};
+
+/* ---------- importação CSV ---------- */
+const CSV_COLS = { slug: "slug", nome: "nome", loja: "nome", localizacao: "localizacao", endereco: "localizacao", local: "localizacao", box: "localizacao",
+  categorias: "categorias", segmentos: "categorias", segmento: "categorias", produtos: "produtos", tags: "produtos", palavraschave: "produtos",
+  descricao: "descricao", whatsapp: "whatsapp", telefone: "whatsapp", instagram: "instagram", promo: "promo", promocao: "promo",
+  destaque: "destaque", status: "status", situacao: "status" };
+function parseCSV(txt) {
+  txt = txt.replace(/^﻿/, ""); const first = txt.split(/\r?\n/)[0], d = first.split(";").length > first.split(",").length ? ";" : ",";
+  const rows = []; let row = [], f = "", q = false;
+  for (let i = 0; i < txt.length; i++) {
+    const c = txt[i];
+    if (q) { if (c === '"') { if (txt[i + 1] === '"') { f += '"'; i++; } else q = false; } else f += c; }
+    else if (c === '"') q = true;
+    else if (c === d) { row.push(f); f = ""; }
+    else if (c === "\n" || c === "\r") { if (c === "\r" && txt[i + 1] === "\n") i++; row.push(f); f = ""; rows.push(row); row = []; }
+    else f += c;
+  }
+  if (f !== "" || row.length) { row.push(f); rows.push(row); }
+  return rows.filter(r => r.some(x => x.trim()));
+}
+const yes = v => /^(1|s|sim|true|x|vaga|vago|disponivel|livre|alugar|locacao)$/.test(MM.norm(v || "").trim());
+function csvToRows(txt) {
+  const rows = parseCSV(txt); if (rows.length < 2) throw new Error("A planilha precisa ter o cabeçalho e ao menos uma linha.");
+  const head = rows[0].map(h => CSV_COLS[MM.norm(h).replace(/[^a-z]/g, "")] || null);
+  if (!head.includes("localizacao")) throw new Error("Falta a coluna “localizacao” (endereço oficial: Via – Piso (Loja)).");
+  const byslug = new Map(ALL.map(x => [x.slug, x])), seen = new Set(), out = [], errs = [];
+  rows.slice(1).forEach((cells, i) => {
+    const o = {}; head.forEach((k, j) => { if (k && (cells[j] || "").trim()) o[k] = cells[j].trim(); });
+    const vaga = "status" in o ? yes(o.status) : null, n = i + 2;
+    if (!o.localizacao) return errs.push(`linha ${n}: sem localizacao`);
+    if (!o.nome && vaga !== true) return errs.push(`linha ${n}: sem nome`);
+    let slug = MM.slugify(o.slug || (vaga === true && !o.nome ? "vaga " + o.localizacao : o.nome)), base = slug, k = 2;
+    if (!slug) return errs.push(`linha ${n}: nome inválido`);
+    while (seen.has(slug)) slug = base + "-" + k++; seen.add(slug);
+    const old = byslug.get(slug), r = Object.assign({ slug, nome: "Box disponível", localizacao: "", categorias: [], descricao: "", produtos: "", whatsapp: "", instagram: "", promo: "", destaque: false, status: "ocupada", locacao_info: "" },
+      old ? { nome: old.nome, localizacao: old.localizacao, categorias: old.categorias, descricao: old.descricao, produtos: old.produtos, whatsapp: old.whatsapp, instagram: old.instagram, promo: old.promo, destaque: old.destaque, status: old.status, locacao_info: old.locacao_info } : {});
+    if (o.nome) r.nome = o.nome; r.localizacao = o.localizacao;
+    if (o.categorias) r.categorias = o.categorias.split(/[,|;/]/).map(x => x.trim()).filter(Boolean);
+    if (o.descricao) r.descricao = o.descricao.slice(0, 600); if (o.produtos) r.produtos = o.produtos.slice(0, 400);
+    if (o.whatsapp) r.whatsapp = o.whatsapp.replace(/[^\d+ ()-]/g, "").slice(0, 20); if (o.instagram) r.instagram = o.instagram.slice(0, 120); if (o.promo) r.promo = o.promo.slice(0, 140);
+    if ("destaque" in o) r.destaque = yes(o.destaque); if (vaga !== null) r.status = vaga ? "vaga" : "ocupada";
+    out.push({ r, novo: !old });
+  });
+  return { out, errs };
+}
+let CSVROWS = null;
+$("csvmodel").href = "data:text/csv;charset=utf-8," + encodeURIComponent("﻿nome;localizacao;categorias;produtos;descricao;whatsapp;instagram;promo;destaque;status\nExemplo Moda;Rua 03 – Térreo (Loja 125);Feminino,Jeans;vestido midi, calça wide leg;Moda feminina no atacado;62999999999;@exemplomoda;;nao;ocupada\n;Rua 03 – Térreo (Loja 127);;;;;;;;vaga\n");
+$("csvf").onchange = async e => {
+  const f = e.target.files[0]; CSVROWS = null; $("csvgo").classList.add("hide"); $("csvmsg").textContent = ""; if (!f) return;
+  try {
+    if (!ALL.length) await loadLojas();
+    const { out, errs } = csvToRows(await f.text()); CSVROWS = out.map(x => x.r);
+    const nv = out.filter(x => x.novo).length, vg = out.filter(x => x.r.status === "vaga").length;
+    $("csvprev").innerHTML = `<b>${out.length}</b> linhas válidas: ${nv} novas, ${out.length - nv} atualizações, ${vg} boxes vagos.` + (errs.length ? `<br><span style="color:var(--acc)">${errs.length} ignoradas:</span> ${esc(errs.slice(0, 8).join("; "))}${errs.length > 8 ? "…" : ""}` : "");
+    if (out.length) $("csvgo").classList.remove("hide");
+  } catch (er) { $("csvprev").innerHTML = `<span class="msg er">${esc(er.message)}</span>`; }
+};
+$("csvgo").onclick = async () => {
+  if (!CSVROWS) return; const m = $("csvmsg"); $("csvgo").classList.add("hide"); let n = 0;
+  for (let i = 0; i < CSVROWS.length; i += 200) {
+    const { error } = await sb.from("lojas").upsert(CSVROWS.slice(i, i + 200), { onConflict: "slug" });
+    if (error) return msg(m, `Parou após ${n} linhas: ${error.message}`);
+    n += Math.min(200, CSVROWS.length - i); msg(m, `Importando… ${n}/${CSVROWS.length}`, true);
+  }
+  msg(m, `Pronto: ${n} lojas importadas. O mapa já mostra as mudanças.`, true); CSVROWS = null; $("csvf").value = ""; $("csvprev").textContent = ""; await loadLojas();
+};
+
+/* ---------- estatísticas ---------- */
+$("dias").onchange = loadStats;
+async function loadStats() {
+  const el = $("sbody"); el.textContent = "Carregando…";
+  const { data: d, error } = await sb.rpc("estatisticas", { p_dias: +$("dias").value });
+  if (error) return el.innerHTML = `<span class="msg er">${esc(error.message)}</span>`;
+  const t = d.totais || {}, max = Math.max(1, ...d.por_dia.map(x => x.n));
+  const rank = (title, arr, empty) => `<div><h3>${title}</h3><div class="rank">${arr.length ? arr.map(x => `<div><span>${esc(x.k)}</span><b>${x.n}</b></div>`).join("") : `<div class="mut">${empty}</div>`}</div></div>`;
+  el.innerHTML = `<div class="kpis">
+      <div class="kpi"><b>${d.visitantes}</b><span>visitantes</span></div><div class="kpi"><b>${t.abrir || 0}</b><span>aberturas do app</span></div>
+      <div class="kpi"><b>${t.busca || 0}</b><span>buscas</span></div><div class="kpi"><b>${t.loja || 0}</b><span>lojas abertas</span></div>
+      <div class="kpi"><b>${t.qr || 0}</b><span>QR Codes lidos</span></div><div class="kpi"><b>${t.whats || 0}</b><span>cliques no WhatsApp</span></div><div class="kpi"><b>${t.cam || 0}</b><span>rotas na câmera</span></div>
+      <div class="kpi"><b>${t.link || 0}</b><span>aberturas por link direto</span></div><div class="kpi"><b>${t.locacao || 0}</b><span>interesses em boxes vagos</span></div></div>
+    <h3>Visitantes por dia</h3><div class="bars">${d.por_dia.map(x => `<div title="${x.dia}: ${x.n}" style="height:${Math.round(x.n / max * 100)}%"></div>`).join("") || '<span class="mut">Sem dados ainda.</span>'}</div>
+    <div class="cols">${rank("Lojas mais procuradas", d.top_lojas, "Sem dados.")}${rank("O que mais buscam", d.top_buscas, "Sem dados.")}
+      ${rank("Buscas sem resultado (demanda não atendida)", d.sem_resultado, "Nenhuma.")}${rank("Interesse em boxes vagos (leads)", d.locacao || [], "Sem dados.")}${rank("Cliques no WhatsApp por loja", d.whats, "Sem dados.")}${rank("QR Codes mais lidos", d.qr, "Sem dados.")}</div>`;
+}
+
+/* ---------- editor de planta ---------- */
+const ed = { key: null, lay: null, g: null, sel: null, drag: null };
+let pz = null;
+function fillGroups(sel) { sel.innerHTML = MM.groupOrder(built.G).map(k => `<option value="${k}">${gname(k)}</option>`).join(""); }
+function openPlanta() {
+  if (!pz) pz = MM.panZoom($("ed"), $("edwrap"), { handle: edHandle, tap: edTap });
+  if (!$("pg").options.length) fillGroups($("pg"));
+  openGroup($("pg").value);
+}
+$("pg").onchange = () => openGroup($("pg").value);
+function openGroup(k) {
+  ed.key = k; ed.sel = null; ed.lay = MM.layoutOf(built.G[k]);
+  $("dep").value = ed.lay.depth; $("cwr").value = ed.lay.cw; ed.putting = null; marcoList(); preview(); requestAnimationFrame(() => pz.fit(MM.bounds(ed.g), Infinity)); segPanel();
+  msg($("pmsg"), built.G[k].custom ? "Este piso usa uma planta personalizada." : "Este piso está na planta esquemática automática.", true);
+}
+function preview() {
+  const b = MM.build(RAW, Object.assign({}, LAY, { [ed.key]: ed.lay })); ed.g = b.G[ed.key];
+  $("ed").innerHTML = MM.draw(ed.g, { edit: true, selSeg: ed.sel, qr: MM.qrPoints(ed.g) });
+}
+const refOf = id => id.startsWith("L:") ? ed.lay.lanes[id.slice(2)] : ed.lay.links.find(k => "K:" + k.id === id);
+const rr = n => Math.round(n * 10) / 10;
+function edHandle(h, p, phase) {
+  if (h === "entry") { ed.lay.entry = { x: rr(p.x), y: rr(p.y) }; return preview(); }
+  const [id, k] = h.split("|"), ref = refOf(id); if (!ref) return;
+  if (k === "m") {
+    if (phase === "start") { ed.drag = { p0: p, o: Object.assign({}, ref) }; return; }
+    const dx = p.x - ed.drag.p0.x, dy = p.y - ed.drag.p0.y, o = ed.drag.o;
+    Object.assign(ref, { x1: rr(o.x1 + dx), y1: rr(o.y1 + dy), x2: rr(o.x2 + dx), y2: rr(o.y2 + dy) });
+  } else {
+    if (phase === "start") return;
+    const ox = ref[k === "1" ? "x2" : "x1"], oy = ref[k === "1" ? "y2" : "y1"], near = MM.nearest(ed.g, p, id);
+    let x = p.x, y = p.y;
+    if (near && near.d < 12) { x = near.x; y = near.y; } else { if (Math.abs(x - ox) < 8) x = ox; if (Math.abs(y - oy) < 8) y = oy; }
+    ref["x" + k] = rr(x); ref["y" + k] = rr(y);
+  }
+  ed.sel = id; preview(); if (phase === "end") segPanel();
+}
+function edTap(target, p, h) {
+  if (ed.putting) { const tipo = ed.putting; ed.putting = null; $("mput").classList.remove("p"); addMarco(tipo, p); return; }
+  ed.sel = h && h !== "entry" ? h.split("|")[0] : null; preview(); segPanel();
+}
+/* marcos: salvos na hora, em layout['marcos'] */
+$("mt").innerHTML = Object.entries(MM.MT).map(([k, v]) => `<option value="${k}">${v[0]} ${v[1]}</option>`).join("");
+$("mput").onclick = () => { ed.putting = $("mt").value; $("mput").classList.add("p"); $("mhint").textContent = "Agora toque no mapa onde fica."; };
+async function addMarco(tipo, p) {
+  const all = Object.assign({}, LAY.marcos || {}); all[ed.key] = (all[ed.key] || []).concat([{ id: "m" + Date.now().toString(36), t: tipo, x: rr(p.x), y: rr(p.y) }]);
+  await saveMarcos(all);
+}
+async function saveMarcos(all) {
+  try { LAY.marcos = all; await persist("marcos", all); rebuild(); preview(); marcoList(); $("mhint").textContent = "Marco salvo. Já vale para todos."; }
+  catch (e) { $("mhint").textContent = "Erro ao salvar: " + e.message; }
+}
+function marcoList() {
+  const l = ((LAY.marcos || {})[ed.key] || []);
+  $("mlist").innerHTML = l.map(m => `<span class="btn" style="margin:2px 4px 2px 0">${MM.MT[m.t] ? MM.MT[m.t][0] + " " + MM.MT[m.t][1] : esc(m.t)} <b data-mdel="${m.id}" style="cursor:pointer;margin-left:6px">✕</b></span>`).join("") || '<span class="mut">Nenhum marco neste piso.</span>';
+}
+$("mlist").onclick = e => { const b = e.target.closest("[data-mdel]"); if (!b) return; const all = Object.assign({}, LAY.marcos || {}); all[ed.key] = (all[ed.key] || []).filter(m => m.id !== b.dataset.mdel); saveMarcos(all); };
+function segPanel() {
+  const el = $("segp"); if (!ed.sel) { el.innerHTML = "Toque em um corredor para ver opções (escala em metros, renomear/excluir ligações)."; return; }
+  const s = ed.g.segs.find(x => x.id === ed.sel); if (!s) return;
+  const len = Math.hypot(s.x2 - s.x1, s.y2 - s.y1), link = s.kind === "link";
+  el.innerHTML = `<b style="color:var(--ink)">${esc(s.name)}</b> — ${link ? "ligação" : "corredor de lojas"} · hoje equivale a ~${Math.round(len * ed.lay.mpu)} m
+    <div class="row">${link ? `<input type="text" id="kname" value="${esc(s.name)}" style="flex:1;min-width:150px" placeholder="nome (ex.: corredor principal, passarela)">` : ""}
+      <input type="number" id="kreal" style="width:150px" placeholder="comprimento real (m)" min="1"><button class="btn" id="kset">Aplicar</button>
+      ${link ? '<button class="btn d" id="kdel">Excluir ligação</button>' : ""}</div>
+    <div class="mut">O comprimento real deste trecho define a escala em metros de todo o piso.</div>`;
+  $("kset").onclick = () => { const ref = refOf(ed.sel), m = +$("kreal").value; if (m > 0) ed.lay.mpu = m / len; if (link && $("kname").value.trim()) ref.name = $("kname").value.trim(); preview(); segPanel(); };
+  if (link) $("kdel").onclick = () => { ed.lay.links = ed.lay.links.filter(k => "K:" + k.id !== ed.sel); ed.sel = null; preview(); segPanel(); };
+}
+$("addk").onclick = () => { const v = pz.vb(), cx = v.x + v.w / 2, cy = v.y + v.h / 2, id = "n" + Date.now().toString(36); ed.lay.links.push({ id, name: "corredor principal", x1: rr(cx - v.w / 6), y1: rr(cy), x2: rr(cx + v.w / 6), y2: rr(cy) }); ed.sel = "K:" + id; preview(); segPanel(); };
+$("pfit").onclick = () => pz.fit(MM.bounds(ed.g), Infinity);
+$("dep").oninput = e => { ed.lay.depth = +e.target.value; preview(); };
+$("cwr").oninput = e => { ed.lay.cw = +e.target.value; preview(); };
+$("rmbg").onclick = () => { ed.lay.bg = null; preview(); };
+$("bgf").onchange = e => {
+  const f = e.target.files[0]; if (!f) return; const fr = new FileReader();
+  fr.onload = () => { const im = new Image(); im.onload = () => {
+    const w = Math.min(1600, im.width), h = Math.round(im.height * w / im.width), c = document.createElement("canvas"); c.width = w; c.height = h; c.getContext("2d").drawImage(im, 0, 0, w, h);
+    ed.lay.bg = { src: c.toDataURL("image/jpeg", 0.72), w: 1200, h: Math.round(1200 * h / w) }; preview(); pz.fit(MM.bounds(ed.g), Infinity);
+    msg($("pmsg"), "Imagem carregada. Arraste os corredores para cima dela e salve.", true);
+  }; im.src = fr.result; }; fr.readAsDataURL(f); e.target.value = "";
+};
+async function persist(key, dados) {
+  if (sb) { const r = dados == null ? await sb.from("layout").delete().eq("chave", key) : await sb.from("layout").upsert({ chave: key, dados, atualizado_em: new Date().toISOString() }); if (r.error) throw r.error; }
+  else { try { localStorage.setItem("mm_layouts", JSON.stringify(LAY)); } catch (e) { throw new Error("Sem espaço no navegador para guardar a imagem; use “Exportar layout.json”."); } }
+}
+$("psave").onclick = async () => {
+  LAY[ed.key] = JSON.parse(JSON.stringify(ed.lay));
+  try { await persist(ed.key, LAY[ed.key]); rebuild(); msg($("pmsg"), sb ? "Planta salva. Já vale para todos os usuários." : "Planta salva neste navegador. Use “Exportar layout.json” para publicar no site.", true); }
+  catch (e) { msg($("pmsg"), "Erro ao salvar: " + e.message); }
+};
+$("preset").onclick = async () => { delete LAY[ed.key]; try { await persist(ed.key, null); } catch (e) { return msg($("pmsg"), "Erro: " + e.message); } rebuild(); openGroup(ed.key); };
+$("pexp").onclick = () => { const out = Object.assign({}, LAY, { [ed.key]: ed.lay }), t = $("pjson"); t.value = JSON.stringify(out); t.classList.remove("hide"); t.select();
+  msg($("pmsg"), "Copie o texto abaixo e salve como layout.json na mesma pasta do index.html (necessário só no modo sem Supabase).", true); };
+$("pgps").onclick = () => {
+  if (!("geolocation" in navigator)) return msg($("gmsg"), "Este navegador não tem GPS.");
+  msg($("gmsg"), "Obtendo GPS…", true);
+  navigator.geolocation.getCurrentPosition(async p => {
+    const b = built.G[ed.key].b; LAY.predios = Object.assign({}, LAY.predios, { [b]: { lat: p.coords.latitude, lng: p.coords.longitude } });
+    try { await persist("predios", LAY.predios); msg($("gmsg"), `Gravado para ${MM.BUILD[b].name} (precisão ±${Math.round(p.coords.accuracy)} m).`, true); } catch (e) { msg($("gmsg"), "Erro: " + e.message); }
+  }, () => msg($("gmsg"), "Não foi possível obter o GPS (permissão negada?)."), { enableHighAccuracy: true, timeout: 20000 });
+};
+
+/* ---------- QR Codes ---------- */
+async function openQR() {
+  if (!$("qg").options.length) { fillGroups($("qg")); $("qbase").value = location.href.replace(/[#?].*$/, "").replace(/admin\.html$/, "index.html"); }
+  if (!window.qrcode) { try { await loadScript("https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"); } catch (e) { $("qrs").innerHTML = `<div class="msg er">Sem internet para carregar o gerador de QR.</div>`; return; } }
+  renderQR();
+}
+function renderQR() {
+  const g = built.G[$("qg").value], base = $("qbase").value.trim().replace(/#.*$/, "");
+  $("qrs").innerHTML = MM.qrPoints(g).map(p => { const q = qrcode(0, "M"); q.addData(base + "#" + p.code); q.make();
+    return `<div class="qr">${q.createSvgTag({ cellSize: 4, margin: 2, scalable: true })}<b>📍 ${esc(p.label)}</b><span>${esc(MM.BUILD[g.b].name)} · ${esc(MM.FLOORS[g.f])}</span><span>Aponte a câmera e veja o mapa das lojas</span></div>`; }).join("");
+}
+$("qg").onchange = renderQR; $("qbase").oninput = renderQR; $("qprint").onclick = () => window.print();
+
+init().catch(e => { $("who").textContent = "erro: " + e.message; });
+</script>
+</body>
+</html>
