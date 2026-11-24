@@ -623,18 +623,21 @@ function refresh(jump){
 
 /* ---------- GPS ---------- */
 try{ const c=lsGet("mm_cal",{}); for(const k in c) if(BUILD[k]) Object.assign(BUILD[k],c[k],{cal:true}); }catch(e){}
-function startGPS(){
-  st.view="me"; if(st.sheet==="peek") setSheet("mid");
-  if (!("geolocation" in navigator)){ st.gpsMsg="Este navegador não tem GPS."; return refresh(); }
-  if (st.watch) { renderSheet(); return; }
-  st.gpsMsg="Procurando sua localização…"; refresh();
+function startGPS(silent){
+  silent = silent===true;
+  if (!silent){ st.view="me"; if(st.sheet==="peek") setSheet("mid"); }
+  if (!("geolocation" in navigator)){ st.gpsMsg="Este navegador não tem GPS."; return silent ? null : refresh(); }
+  if (st.watch) { if(!silent) renderSheet(); return; }
+  st.gpsMsg="Procurando sua localização…"; if(!silent) refresh(); else toast("📍 Procurando em qual prédio você está…",2500);
   try{ st.watch=navigator.geolocation.watchPosition(p=>{
     st.gps={lat:p.coords.latitude,lng:p.coords.longitude,acc:p.coords.accuracy};
     let best=null; for(const k of BORDER){ const d=MM.hav(st.gps.lat,st.gps.lng,BUILD[k].lat,BUILD[k].lng); if(!best||d<best.d) best={k,d}; }
     st.gpsB=best; const inside=best.d<120+Math.min(st.gps.acc,80);
     $("gps").classList.add("on");
     st.gpsMsg=inside?`📍 Você está no ${BUILD[best.k].name} (±${Math.round(st.gps.acc)} m).`:`Você está a ${best.d>1000?(best.d/1000).toFixed(1)+" km":Math.round(best.d)+" m"} do ${BUILD[best.k].name}.`;
-    if (inside && !st.auto){ st.auto=true; const k=G[best.k+"|T"]?best.k+"|T":Object.keys(G).find(x=>x.startsWith(best.k)); if(k && G[st.g].b!==best.k) showGroup(k,true); }
+    if (inside && !st.auto){ st.auto=true; const k=G[best.k+"|T"]?best.k+"|T":Object.keys(G).find(x=>x.startsWith(best.k)); if(k && G[st.g].b!==best.k) showGroup(k,true);
+      if(!st.me && k){ const gg=G[k]; st.me={g:k,x:gg.entry.x,y:gg.entry.y,how:"entrada"}; refresh(); initialView(); }
+      toast("📍 Você está no "+BUILD[best.k].name,3500); }
     if (st.view==="me") renderSheet();
   }, err=>{ st.watch=null; st.gpsMsg=err.code===1?"A permissão de localização foi negada ou está bloqueada nesta janela. No site publicado (HTTPS), permita o acesso ao local.":"Não foi possível obter o GPS agora."; $("gps").classList.remove("on"); if(st.view==="me") renderSheet(); }, {enableHighAccuracy:true,maximumAge:5000,timeout:20000}); }
   catch(e){ st.gpsMsg="GPS indisponível nesta janela."; refresh(); }
@@ -707,7 +710,15 @@ function applyLink(keep){
   st.back="home"; selectStore(s.id,true,!!keep); setSheet("mid");
 }
 window.addEventListener("resize",fit);
+/* ao abrir: pede o GPS sozinho para descobrir o prédio (sem o usuário escolher) */
+let gpsAsked=false;
+function autoGPS(){
+  if(gpsAsked) return; gpsAsked=true;
+  const go=()=>startGPS(true);
+  try{ if(navigator.permissions&&navigator.permissions.query) navigator.permissions.query({name:"geolocation"}).then(q=>{ if(q.state!=="denied") go(); },go); else go(); }catch(e){ go(); }
+}
 boot({stores:MM.embedded(),layouts:{},src:"embutido",date:window.MM_DATE||""});
+setTimeout(autoGPS,600);
 MM.load().then(d=>{ if(d.src!=="embutido"||Object.keys(d.layouts).length) boot(d); MM.track("abrir"); });
 </script>
 </body>

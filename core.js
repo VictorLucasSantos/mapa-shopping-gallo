@@ -550,10 +550,10 @@ MM.draw = function (g, o) {
   if (paths.length && (!o.stops || o.fac)) { const l = paths[paths.length - 1], e = l[l.length - 1]; if (e) h += `<circle cx="${r1(e.x)}" cy="${r1(e.y)}" r="6" fill="var(--acc)" stroke="#fff" stroke-width="2" pointer-events="none"/>`; }
   if (o.stops) for (const s of g.stores) { const n = o.stops[s.id]; if (n) h += `<g transform="translate(${r1(s.door.x)} ${r1(s.door.y)})" pointer-events="none"><g class="pin"><path d="M0 0C-3-8-11-12-11-20a11 11 0 0122 0C11-12 3-8 0 0z" fill="var(--lst)" stroke="#fff" stroke-width="2.4"/><text y="-16.5" font-size="11" font-weight="900" fill="#fff" text-anchor="middle">${n}</text></g></g>`; }
   if (o.me) h += `<g transform="translate(${o.me.x} ${o.me.y})" pointer-events="none"><g class="pin"><circle class="pulse" r="8" fill="var(--me)"/><circle r="9" fill="var(--me)" stroke="#fff" stroke-width="3"/><circle r="3" fill="#fff"/></g></g>`;
-  for (const m of (MM.MARCOS[g.key] || [])) { const t = MM.MT[m.t]; if (t) h += `<g pointer-events="none"><circle cx="${r1(m.x)}" cy="${r1(m.y)}" r="9.5" fill="var(--panel,#fff)" stroke="var(--acc2,#2b2860)" stroke-width="1.8"/><text x="${r1(m.x)}" y="${r1(m.y + 4)}" font-size="11" text-anchor="middle">${t[0]}</text></g>`; }
+  for (const m of (MM.MARCOS[g.key] || [])) { const t = MM.MT[m.t]; if (t) h += `<g ${o.edit ? `data-h="M:${m.id}|m" style="cursor:move"` : 'pointer-events="none"'}><circle cx="${r1(m.x)}" cy="${r1(m.y)}" r="${o.edit ? 13 : 9.5}" fill="var(--panel,#fff)" stroke="${o.selSeg === "M:" + m.id ? "#e65100" : "var(--acc2,#2b2860)"}" stroke-width="${o.selSeg === "M:" + m.id ? 3.2 : 1.8}"/><text x="${r1(m.x)}" y="${r1(m.y + 4)}" font-size="11" text-anchor="middle">${t[0]}</text></g>`; }
   if (o.qr) for (const p of o.qr) h += `<g pointer-events="none"><rect x="${p.x - 5}" y="${p.y - 5}" width="10" height="10" rx="2" fill="#111"/><rect x="${p.x - 2.5}" y="${p.y - 2.5}" width="5" height="5" fill="#fff"/></g>`;
   if (o.edit) for (const s of g.segs.filter(x => x.kind === "link").concat(g.segs.filter(x => x.kind === "lane"))) for (const k of [1, 2]) {
-    h += `<circle data-h="${s.id}|${k}" cx="${s["x" + k]}" cy="${s["y" + k]}" r="8" fill="${s.kind === "lane" ? "var(--acc2)" : "var(--acc)"}" stroke="#fff" stroke-width="2.5" style="cursor:move"/>`;
+    h += `<circle class="hd" data-h="${s.id}|${k}" cx="${s["x" + k]}" cy="${s["y" + k]}" r="8" fill="${s.kind === "lane" ? "var(--acc2)" : "var(--acc)"}" stroke="#fff" stroke-width="2.5" style="cursor:move"/>`;
   }
   return h;
 };

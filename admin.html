@@ -38,6 +38,10 @@ textarea{min-height:76px;resize:vertical}
 .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
 #edwrap{position:relative;height:56vh;min-height:320px;border:1px solid var(--line);border-radius:12px;overflow:hidden;touch-action:none;background:#fbf8f3}
 #ed{width:100%;height:100%;display:block;user-select:none}
+#edwrap.t-link,#edwrap.t-marco{cursor:crosshair}
+.zb{position:absolute;right:8px;top:8px;display:flex;flex-direction:column;gap:4px}.zb button{width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.92);font-size:20px;font-weight:800;color:var(--ink)}
+.btn:disabled{opacity:.4;cursor:default}.btn.chipm.on{background:#ffe9d6;border-color:#e65100}
+#ed .hd{stroke-width:3px}
 .qrs{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
 .qr{background:#fff;border:1px solid #222;border-radius:10px;padding:10px;text-align:center;break-inside:avoid}
 .qr svg,.qr img{width:100%;height:auto;max-width:170px}
@@ -93,21 +97,29 @@ textarea{min-height:76px;resize:vertical}
   <section class="hide" id="v-planta">
     <div class="box">
       <h2>Planta do piso</h2>
-      <p class="mut noprint">Envie a foto/planta oficial do piso como fundo e arraste cada corredor (bolinhas nas pontas, ou o corredor inteiro) para cima do desenho. As lojas se distribuem sozinhas ao longo do corredor, pela ordem dos números. Encoste as pontas umas nas outras, ou use “＋ Ligação”, para as rotas conectarem.</p>
-      <div class="row"><select id="pg" style="flex:1;min-width:180px"></select>
-        <label class="btn" style="margin:0;color:var(--ink)">🖼 Imagem de fundo<input type="file" id="bgf" accept="image/*" class="hide"></label>
-        <button class="btn" id="addk">＋ Ligação</button><button class="btn" id="pfit">⤢</button></div>
-      <div id="edwrap" style="margin-top:10px"><svg id="ed" xmlns="http://www.w3.org/2000/svg"></svg></div>
-      <div id="segp" class="mut" style="margin-top:8px">Toque em um corredor para ver opções (escala em metros, renomear/excluir ligações).</div>
-      <h3 style="margin:14px 0 6px">Marcos de referência (banheiro, escada, elevador…)</h3>
-      <div class="row"><select id="mt" style="width:auto"></select><button class="btn" id="mput">＋ Colocar no mapa</button><span class="mut" id="mhint">Escolha o tipo, clique no botão e toque no mapa onde fica.</span></div>
+      <details class="mut noprint" style="margin:4px 0 8px"><summary style="cursor:pointer;font-weight:800;color:var(--ink)">Como editar (3 passos)</summary>
+        <ol style="margin:6px 0 0;padding-left:20px"><li>Envie a foto/planta oficial do piso como <b>imagem de fundo</b> (opcional).</li><li>Com a ferramenta <b>☝ Mover</b>, arraste cada corredor <b>pelo meio</b> (move) ou <b>pelas bolinhas das pontas</b> (estica/gira) para cima do desenho. As lojas se distribuem sozinhas ao longo dele, pela ordem dos números.</li><li>Use <b>╱ Ligação</b> para desenhar passarelas/escadas que conectam corredores e <b>📍 Marco</b> para banheiro, escada, elevador, caixa, estacionamento. Depois <b>Salvar planta</b>.</li></ol></details>
+      <div class="row" style="margin-top:0"><select id="pg" style="flex:1;min-width:180px"></select>
+        <label class="btn" style="margin:0;color:var(--ink)">🖼 Imagem de fundo<input type="file" id="bgf" accept="image/*" class="hide"></label><button class="btn" id="rmbg">Remover imagem</button></div>
+      <div class="row tb" id="tb">
+        <button class="btn tool p" data-tool="move">☝ Mover</button>
+        <button class="btn tool" data-tool="link">╱ Ligação</button>
+        <button class="btn tool" data-tool="marco">📍 Marco</button><select id="mt" style="width:auto"></select>
+        <span style="flex:1"></span>
+        <button class="btn" id="undo" title="Desfazer (Ctrl+Z)">↶</button><button class="btn" id="redo" title="Refazer (Ctrl+Y)">↷</button>
+        <label class="btn" style="margin:0;color:var(--ink)" title="Gruda as pontas nos corredores próximos e alinha na reta"><input type="checkbox" id="snap" checked> Ímã</label>
+      </div>
+      <div class="mut" id="mhint" style="margin-top:8px;min-height:34px"></div>
+      <div id="edwrap" style="margin-top:6px"><svg id="ed" xmlns="http://www.w3.org/2000/svg"></svg>
+        <div class="zb"><button id="ezi" aria-label="Aproximar">+</button><button id="ezo" aria-label="Afastar">−</button><button id="pfit" aria-label="Ver tudo">⤢</button></div></div>
+      <div id="segp" class="mut" style="margin-top:8px"></div>
+      <h3 style="margin:14px 0 6px">Marcos neste piso <span class="mut">(toque para selecionar, arraste no mapa para mover)</span></h3>
       <div id="mlist" style="margin-top:6px"></div>
       <div class="row">
         <label style="margin:0">Tamanho das lojas <input type="range" id="dep" min="10" max="60"></label>
         <label style="margin:0">Largura do corredor <input type="range" id="cwr" min="6" max="50"></label>
-        <button class="btn" id="rmbg">Remover imagem</button>
       </div>
-      <div class="row"><button class="btn p" id="psave">Salvar planta</button><button class="btn d" id="preset">Voltar ao esquemático</button><button class="btn" id="pexp">Exportar layout.json</button></div>
+      <div class="row" style="position:sticky;bottom:0;background:var(--panel);padding:8px 0;z-index:5"><button class="btn p" id="psave">Salvar planta</button><button class="btn d" id="preset">Voltar ao esquemático</button><button class="btn" id="pexp">Exportar layout.json</button></div>
       <div class="msg" id="pmsg"></div>
       <textarea id="pjson" class="hide" readonly style="margin-top:8px;font-size:11px;min-height:120px"></textarea>
     </div>
@@ -352,84 +364,157 @@ async function loadStats() {
 }
 
 /* ---------- editor de planta ---------- */
-const ed = { key: null, lay: null, g: null, sel: null, drag: null };
+const ed = { key: null, lay: null, g: null, sel: null, drag: null, tool: "move", hist: [], fut: [], dirty: false, start: null, pre: null, pushed: false };
 let pz = null;
 function fillGroups(sel) { sel.innerHTML = MM.groupOrder(built.G).map(k => `<option value="${k}">${gname(k)}</option>`).join(""); }
 function openPlanta() {
-  if (!pz) pz = MM.panZoom($("ed"), $("edwrap"), { handle: edHandle, tap: edTap });
+  if (!pz) pz = MM.panZoom($("ed"), $("edwrap"), { handle: edHandle, tap: edTap, view: fixHandles });
   if (!$("pg").options.length) fillGroups($("pg"));
   openGroup($("pg").value);
 }
-$("pg").onchange = () => openGroup($("pg").value);
+$("pg").onchange = () => { if (ed.dirty && !confirm("Há alterações não salvas neste piso. Descartar e trocar de piso?")) { $("pg").value = ed.key; return; } openGroup($("pg").value); };
 function openGroup(k) {
-  ed.key = k; ed.sel = null; ed.lay = MM.layoutOf(built.G[k]);
-  $("dep").value = ed.lay.depth; $("cwr").value = ed.lay.cw; ed.putting = null; marcoList(); preview(); requestAnimationFrame(() => pz.fit(MM.bounds(ed.g), Infinity)); segPanel();
+  ed.key = k; ed.sel = null; ed.start = null; ed.hist = []; ed.fut = []; ed.lay = MM.layoutOf(built.G[k]); setDirty(false); setTool("move");
+  $("dep").value = ed.lay.depth; $("cwr").value = ed.lay.cw; marcoList(); preview(); requestAnimationFrame(() => pz.fit(MM.bounds(ed.g), Infinity)); segPanel();
   msg($("pmsg"), built.G[k].custom ? "Este piso usa uma planta personalizada." : "Este piso está na planta esquemática automática.", true);
+}
+/* histórico (desfazer/refazer) e indicador de alterações não salvas */
+function pushHist(json) { ed.hist.push(json); if (ed.hist.length > 25) ed.hist.shift(); ed.fut = []; setDirty(true); }
+function snap() { pushHist(JSON.stringify(ed.lay)); }
+function setDirty(v) { ed.dirty = v; $("psave").textContent = v ? "Salvar planta ●" : "Salvar planta"; updUndo(); }
+function updUndo() { $("undo").disabled = !ed.hist.length; $("redo").disabled = !ed.fut.length; }
+function undo() { if (!ed.hist.length) return; ed.fut.push(JSON.stringify(ed.lay)); ed.lay = JSON.parse(ed.hist.pop()); ed.sel = null; $("dep").value = ed.lay.depth; $("cwr").value = ed.lay.cw; preview(); segPanel(); setDirty(true); }
+function redo() { if (!ed.fut.length) return; ed.hist.push(JSON.stringify(ed.lay)); ed.lay = JSON.parse(ed.fut.pop()); ed.sel = null; $("dep").value = ed.lay.depth; $("cwr").value = ed.lay.cw; preview(); segPanel(); setDirty(true); }
+$("undo").onclick = undo; $("redo").onclick = redo;
+window.addEventListener("beforeunload", e => { if (ed.dirty) { e.preventDefault(); e.returnValue = ""; } });
+/* ferramentas */
+const HINTS = {
+  move: "☝ <b>Mover:</b> arraste um corredor <b>pelo meio</b> para deslocá-lo, ou pelas <b>bolinhas das pontas</b> para esticar/girar. Arraste um <b>marco</b> (ícone) para reposicioná-lo. Toque num item para ver as opções. Pinça ou roda do mouse = zoom.",
+  link: "╱ <b>Ligação:</b> toque no mapa onde ela <b>começa</b> e depois onde <b>termina</b> (as pontas grudam nos corredores próximos).",
+  marco: "📍 <b>Marco:</b> escolha o tipo ao lado e toque no mapa onde fica. Pode tocar várias vezes; volte para ☝ Mover quando terminar."
+};
+function setTool(t) {
+  ed.tool = t; ed.start = null;
+  document.querySelectorAll("#tb .tool").forEach(b => b.classList.toggle("p", b.dataset.tool === t));
+  $("edwrap").className = "t-" + t; $("mhint").innerHTML = HINTS[t]; if (ed.g) preview();
+}
+$("tb").onclick = e => { const b = e.target.closest(".tool"); if (b) setTool(b.dataset.tool === ed.tool && ed.tool !== "move" ? "move" : b.dataset.tool); };
+$("mt").onchange = () => setTool("marco");
+function fixHandles(vb) {
+  vb = vb || pz.vb(); const k = vb.w / ($("edwrap").clientWidth || 360);
+  document.querySelectorAll("#ed .hd").forEach(c => c.setAttribute("r", Math.max(7, 12 * k).toFixed(1)));
 }
 function preview() {
   const b = MM.build(RAW, Object.assign({}, LAY, { [ed.key]: ed.lay })); ed.g = b.G[ed.key];
   $("ed").innerHTML = MM.draw(ed.g, { edit: true, selSeg: ed.sel, qr: MM.qrPoints(ed.g) });
+  if (ed.start) $("ed").insertAdjacentHTML("beforeend", `<circle class="hd" cx="${ed.start.x}" cy="${ed.start.y}" r="8" fill="#e65100" stroke="#fff" stroke-width="3" pointer-events="none"/>`);
+  fixHandles();
 }
-const refOf = id => id.startsWith("L:") ? ed.lay.lanes[id.slice(2)] : ed.lay.links.find(k => "K:" + k.id === id);
+const marcoOf = id => ((LAY.marcos || {})[ed.key] || []).find(m => "M:" + m.id === id);
+const refOf = id => id.startsWith("L:") ? ed.lay.lanes[id.slice(2)] : id.startsWith("M:") ? marcoOf(id) : ed.lay.links.find(k => "K:" + k.id === id);
 const rr = n => Math.round(n * 10) / 10;
+const snapOn = () => $("snap").checked;
+function snapPt(p, id) { const near = MM.nearest(ed.g, p, id); return snapOn() && near && near.d < 14 ? { x: rr(near.x), y: rr(near.y) } : { x: rr(p.x), y: rr(p.y) }; }
 function edHandle(h, p, phase) {
-  if (h === "entry") { ed.lay.entry = { x: rr(p.x), y: rr(p.y) }; return preview(); }
+  if (phase === "start") { ed.pre = JSON.stringify(ed.lay); ed.pushed = false; }
+  else if (!ed.pushed) { ed.pushed = true; pushHist(ed.pre); }
+  if (h === "entry") { if (phase !== "start") { ed.lay.entry = { x: rr(p.x), y: rr(p.y) }; preview(); } return; }
   const [id, k] = h.split("|"), ref = refOf(id); if (!ref) return;
+  if (id.startsWith("M:")) {
+    if (phase === "start") { ed.sel = id; return preview(); }
+    const q = snapPt(p); ref.x = q.x; ref.y = q.y; preview();
+    if (phase === "end") { marcoList(); segPanel(); saveMarcos(Object.assign({}, LAY.marcos)); }
+    return;
+  }
   if (k === "m") {
-    if (phase === "start") { ed.drag = { p0: p, o: Object.assign({}, ref) }; return; }
+    if (phase === "start") { ed.drag = { p0: p, o: Object.assign({}, ref) }; ed.sel = id; return; }
     const dx = p.x - ed.drag.p0.x, dy = p.y - ed.drag.p0.y, o = ed.drag.o;
     Object.assign(ref, { x1: rr(o.x1 + dx), y1: rr(o.y1 + dy), x2: rr(o.x2 + dx), y2: rr(o.y2 + dy) });
   } else {
-    if (phase === "start") return;
+    if (phase === "start") { ed.sel = id; return; }
     const ox = ref[k === "1" ? "x2" : "x1"], oy = ref[k === "1" ? "y2" : "y1"], near = MM.nearest(ed.g, p, id);
     let x = p.x, y = p.y;
-    if (near && near.d < 12) { x = near.x; y = near.y; } else { if (Math.abs(x - ox) < 8) x = ox; if (Math.abs(y - oy) < 8) y = oy; }
+    if (snapOn()) { if (near && near.d < 12) { x = near.x; y = near.y; } else { if (Math.abs(x - ox) < 8) x = ox; if (Math.abs(y - oy) < 8) y = oy; } }
     ref["x" + k] = rr(x); ref["y" + k] = rr(y);
   }
   ed.sel = id; preview(); if (phase === "end") segPanel();
 }
 function edTap(target, p, h) {
-  if (ed.putting) { const tipo = ed.putting; ed.putting = null; $("mput").classList.remove("p"); addMarco(tipo, p); return; }
+  if (ed.tool === "marco") return addMarco($("mt").value, snapPt(p));
+  if (ed.tool === "link") {
+    const q = snapPt(p);
+    if (!ed.start) { ed.start = q; $("mhint").innerHTML = "╱ Agora toque onde a ligação <b>termina</b>."; return preview(); }
+    if (Math.hypot(q.x - ed.start.x, q.y - ed.start.y) < 10) { ed.start = null; $("mhint").innerHTML = HINTS.link; return preview(); }
+    snap(); const id = "n" + Date.now().toString(36);
+    ed.lay.links.push({ id, name: "ligação", x1: ed.start.x, y1: ed.start.y, x2: q.x, y2: q.y }); ed.sel = "K:" + id; setTool("move"); preview(); segPanel(); return;
+  }
   ed.sel = h && h !== "entry" ? h.split("|")[0] : null; preview(); segPanel();
 }
 /* marcos: salvos na hora, em layout['marcos'] */
 $("mt").innerHTML = Object.entries(MM.MT).map(([k, v]) => `<option value="${k}">${v[0]} ${v[1]}</option>`).join("");
-$("mput").onclick = () => { ed.putting = $("mt").value; $("mput").classList.add("p"); $("mhint").textContent = "Agora toque no mapa onde fica."; };
 async function addMarco(tipo, p) {
-  const all = Object.assign({}, LAY.marcos || {}); all[ed.key] = (all[ed.key] || []).concat([{ id: "m" + Date.now().toString(36), t: tipo, x: rr(p.x), y: rr(p.y) }]);
-  await saveMarcos(all);
+  const all = Object.assign({}, LAY.marcos || {}), id = "m" + Date.now().toString(36); all[ed.key] = (all[ed.key] || []).concat([{ id, t: tipo, x: rr(p.x), y: rr(p.y) }]);
+  ed.sel = "M:" + id; await saveMarcos(all);
 }
 async function saveMarcos(all) {
-  try { LAY.marcos = all; await persist("marcos", all); rebuild(); preview(); marcoList(); $("mhint").textContent = "Marco salvo. Já vale para todos."; }
+  try { LAY.marcos = all; await persist("marcos", all); rebuild(); preview(); marcoList(); segPanel(); $("mhint").innerHTML = "✓ Marco salvo — já vale para todos. " + (ed.tool === "marco" ? "Toque para colocar outro." : ""); }
   catch (e) { $("mhint").textContent = "Erro ao salvar: " + e.message; }
 }
 function marcoList() {
   const l = ((LAY.marcos || {})[ed.key] || []);
-  $("mlist").innerHTML = l.map(m => `<span class="btn" style="margin:2px 4px 2px 0">${MM.MT[m.t] ? MM.MT[m.t][0] + " " + MM.MT[m.t][1] : esc(m.t)} <b data-mdel="${m.id}" style="cursor:pointer;margin-left:6px">✕</b></span>`).join("") || '<span class="mut">Nenhum marco neste piso.</span>';
+  $("mlist").innerHTML = l.map(m => `<span class="btn chipm ${ed.sel === "M:" + m.id ? "on" : ""}" data-msel="${m.id}" style="margin:2px 4px 2px 0">${MM.MT[m.t] ? MM.MT[m.t][0] + " " + MM.MT[m.t][1] : esc(m.t)} <b data-mdel="${m.id}" style="cursor:pointer;margin-left:6px" title="Excluir">✕</b></span>`).join("") || '<span class="mut">Nenhum marco neste piso. Use a ferramenta 📍 Marco.</span>';
 }
-$("mlist").onclick = e => { const b = e.target.closest("[data-mdel]"); if (!b) return; const all = Object.assign({}, LAY.marcos || {}); all[ed.key] = (all[ed.key] || []).filter(m => m.id !== b.dataset.mdel); saveMarcos(all); };
+$("mlist").onclick = e => {
+  const d = e.target.closest("[data-mdel]"); if (d) return delMarco(d.dataset.mdel);
+  const s = e.target.closest("[data-msel]"); if (s) { ed.sel = "M:" + s.dataset.msel; const m = marcoOf(ed.sel); preview(); marcoList(); segPanel(); if (m) pz.center(m.x, m.y); }
+};
+function delMarco(id) { const all = Object.assign({}, LAY.marcos || {}); all[ed.key] = (all[ed.key] || []).filter(m => m.id !== id); if (ed.sel === "M:" + id) ed.sel = null; saveMarcos(all); }
 function segPanel() {
-  const el = $("segp"); if (!ed.sel) { el.innerHTML = "Toque em um corredor para ver opções (escala em metros, renomear/excluir ligações)."; return; }
+  const el = $("segp");
+  if (!ed.sel) { el.innerHTML = "Nada selecionado. Toque num corredor, ligação ou marco para ver as opções."; return; }
+  if (ed.sel.startsWith("M:")) {
+    const m = marcoOf(ed.sel); if (!m) { el.innerHTML = ""; return; }
+    el.innerHTML = `<b style="color:var(--ink)">${MM.MT[m.t] ? MM.MT[m.t][0] + " " + MM.MT[m.t][1] : esc(m.t)}</b> — arraste no mapa para mover.
+      <div class="row"><select id="mtype" style="width:auto">${Object.entries(MM.MT).map(([k, v]) => `<option value="${k}" ${k === m.t ? "selected" : ""}>${v[0]} ${v[1]}</option>`).join("")}</select><button class="btn d" id="mdelb">Excluir marco</button></div>`;
+    $("mtype").onchange = () => { const all = Object.assign({}, LAY.marcos || {}); all[ed.key] = (all[ed.key] || []).map(x => x.id === m.id ? Object.assign({}, x, { t: $("mtype").value }) : x); saveMarcos(all); };
+    $("mdelb").onclick = () => delMarco(m.id); return;
+  }
   const s = ed.g.segs.find(x => x.id === ed.sel); if (!s) return;
   const len = Math.hypot(s.x2 - s.x1, s.y2 - s.y1), link = s.kind === "link";
   el.innerHTML = `<b style="color:var(--ink)">${esc(s.name)}</b> — ${link ? "ligação" : "corredor de lojas"} · hoje equivale a ~${Math.round(len * ed.lay.mpu)} m
-    <div class="row">${link ? `<input type="text" id="kname" value="${esc(s.name)}" style="flex:1;min-width:150px" placeholder="nome (ex.: corredor principal, passarela)">` : ""}
-      <input type="number" id="kreal" style="width:150px" placeholder="comprimento real (m)" min="1"><button class="btn" id="kset">Aplicar</button>
+    <div class="row"><button class="btn" id="khz">↔ Deixar na horizontal</button><button class="btn" id="kvt">↕ Deixar na vertical</button>${link ? `<input type="text" id="kname" value="${esc(s.name)}" style="flex:1;min-width:140px" placeholder="nome (ex.: passarela)">` : ""}</div>
+    <div class="row"><input type="number" id="kreal" style="width:170px" placeholder="comprimento real (m)" min="1"><button class="btn" id="kset">Aplicar</button>
       ${link ? '<button class="btn d" id="kdel">Excluir ligação</button>' : ""}</div>
     <div class="mut">O comprimento real deste trecho define a escala em metros de todo o piso.</div>`;
-  $("kset").onclick = () => { const ref = refOf(ed.sel), m = +$("kreal").value; if (m > 0) ed.lay.mpu = m / len; if (link && $("kname").value.trim()) ref.name = $("kname").value.trim(); preview(); segPanel(); };
-  if (link) $("kdel").onclick = () => { ed.lay.links = ed.lay.links.filter(k => "K:" + k.id !== ed.sel); ed.sel = null; preview(); segPanel(); };
+  $("khz").onclick = () => { snap(); const r = refOf(ed.sel); r.y2 = r.y1; preview(); segPanel(); };
+  $("kvt").onclick = () => { snap(); const r = refOf(ed.sel); r.x2 = r.x1; preview(); segPanel(); };
+  $("kset").onclick = () => { const ref = refOf(ed.sel), m = +$("kreal").value; snap(); if (m > 0) ed.lay.mpu = m / len; if (link && $("kname").value.trim()) ref.name = $("kname").value.trim(); preview(); segPanel(); };
+  if (link) $("kdel").onclick = () => { snap(); ed.lay.links = ed.lay.links.filter(k => "K:" + k.id !== ed.sel); ed.sel = null; preview(); segPanel(); };
 }
-$("addk").onclick = () => { const v = pz.vb(), cx = v.x + v.w / 2, cy = v.y + v.h / 2, id = "n" + Date.now().toString(36); ed.lay.links.push({ id, name: "corredor principal", x1: rr(cx - v.w / 6), y1: rr(cy), x2: rr(cx + v.w / 6), y2: rr(cy) }); ed.sel = "K:" + id; preview(); segPanel(); };
+/* teclado: Delete exclui, setas empurram, Ctrl+Z / Ctrl+Y */
+document.addEventListener("keydown", e => {
+  if ($("v-planta").classList.contains("hide") || /INPUT|SELECT|TEXTAREA/.test((e.target.tagName || ""))) return;
+  const k = e.key.toLowerCase();
+  if ((e.ctrlKey || e.metaKey) && k === "z") { e.preventDefault(); return e.shiftKey ? redo() : undo(); }
+  if ((e.ctrlKey || e.metaKey) && k === "y") { e.preventDefault(); return redo(); }
+  if (k === "escape") { setTool("move"); ed.sel = null; preview(); segPanel(); return; }
+  if (!ed.sel) return;
+  if (k === "delete" || k === "backspace") { e.preventDefault(); if (ed.sel.startsWith("M:")) delMarco(ed.sel.slice(2)); else if (ed.sel.startsWith("K:")) { snap(); ed.lay.links = ed.lay.links.filter(x => "K:" + x.id !== ed.sel); ed.sel = null; preview(); segPanel(); } return; }
+  const d = { arrowleft: [-1, 0], arrowright: [1, 0], arrowup: [0, -1], arrowdown: [0, 1] }[k]; if (!d || ed.sel.startsWith("M:")) return;
+  e.preventDefault(); const r = refOf(ed.sel), st = e.shiftKey ? 5 : 1; if (!r) return; snap();
+  r.x1 = rr(r.x1 + d[0] * st); r.x2 = rr(r.x2 + d[0] * st); r.y1 = rr(r.y1 + d[1] * st); r.y2 = rr(r.y2 + d[1] * st); preview();
+});
+$("ezi").onclick = () => pz.zoom(1.4); $("ezo").onclick = () => pz.zoom(1 / 1.4);
 $("pfit").onclick = () => pz.fit(MM.bounds(ed.g), Infinity);
+$("dep").addEventListener("pointerdown", snap); $("cwr").addEventListener("pointerdown", snap);
 $("dep").oninput = e => { ed.lay.depth = +e.target.value; preview(); };
 $("cwr").oninput = e => { ed.lay.cw = +e.target.value; preview(); };
-$("rmbg").onclick = () => { ed.lay.bg = null; preview(); };
+$("rmbg").onclick = () => { snap(); ed.lay.bg = null; preview(); };
 $("bgf").onchange = e => {
   const f = e.target.files[0]; if (!f) return; const fr = new FileReader();
   fr.onload = () => { const im = new Image(); im.onload = () => {
     const w = Math.min(1600, im.width), h = Math.round(im.height * w / im.width), c = document.createElement("canvas"); c.width = w; c.height = h; c.getContext("2d").drawImage(im, 0, 0, w, h);
-    ed.lay.bg = { src: c.toDataURL("image/jpeg", 0.72), w: 1200, h: Math.round(1200 * h / w) }; preview(); pz.fit(MM.bounds(ed.g), Infinity);
+    snap(); ed.lay.bg = { src: c.toDataURL("image/jpeg", 0.72), w: 1200, h: Math.round(1200 * h / w) }; preview(); pz.fit(MM.bounds(ed.g), Infinity);
     msg($("pmsg"), "Imagem carregada. Arraste os corredores para cima dela e salve.", true);
   }; im.src = fr.result; }; fr.readAsDataURL(f); e.target.value = "";
 };
@@ -439,10 +524,10 @@ async function persist(key, dados) {
 }
 $("psave").onclick = async () => {
   LAY[ed.key] = JSON.parse(JSON.stringify(ed.lay));
-  try { await persist(ed.key, LAY[ed.key]); rebuild(); msg($("pmsg"), sb ? "Planta salva. Já vale para todos os usuários." : "Planta salva neste navegador. Use “Exportar layout.json” para publicar no site.", true); }
+  try { await persist(ed.key, LAY[ed.key]); rebuild(); setDirty(false); msg($("pmsg"), sb ? "✓ Planta salva. Já vale para todos os usuários." : "Planta salva neste navegador. Use “Exportar layout.json” para publicar no site.", true); }
   catch (e) { msg($("pmsg"), "Erro ao salvar: " + e.message); }
 };
-$("preset").onclick = async () => { delete LAY[ed.key]; try { await persist(ed.key, null); } catch (e) { return msg($("pmsg"), "Erro: " + e.message); } rebuild(); openGroup(ed.key); };
+$("preset").onclick = async () => { if (!confirm("Voltar este piso para a planta esquemática automática? Sua edição será perdida.")) return; delete LAY[ed.key]; try { await persist(ed.key, null); } catch (e) { return msg($("pmsg"), "Erro: " + e.message); } rebuild(); openGroup(ed.key); };
 $("pexp").onclick = () => { const out = Object.assign({}, LAY, { [ed.key]: ed.lay }), t = $("pjson"); t.value = JSON.stringify(out); t.classList.remove("hide"); t.select();
   msg($("pmsg"), "Copie o texto abaixo e salve como layout.json na mesma pasta do index.html (necessário só no modo sem Supabase).", true); };
 $("pgps").onclick = () => {
