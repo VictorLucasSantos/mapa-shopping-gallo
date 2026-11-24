@@ -138,7 +138,7 @@ footer#bar{display:flex;background:var(--panel);border-top:1px solid var(--line)
   <svg id="map" xmlns="http://www.w3.org/2000/svg"></svg>
   <div class="fabl"><button id="mark">📍 Marcar onde estou</button></div>
   <div class="fab">
-    <button id="cam" class="on" aria-label="Ver o caminho na câmera">📷</button>
+    <button id="navb" class="on" aria-label="Navegar até a loja (mapa que gira com o celular ou câmera)">🧭</button>
     <button id="v3" class="t3" aria-label="Alternar entre mapa 2D e 3D">3D</button>
     <button id="rl" class="rot" aria-label="Girar para a esquerda">⟲</button>
     <button id="rr" class="rot" aria-label="Girar para a direita">⟳</button>
@@ -327,10 +327,10 @@ function openCam(s, fromList){
   if (!same) setTimeout(()=>{ const m=document.getElementById("cmsg"); if(m){ m.textContent=`Rota a partir da entrada do ${FLOORS[g.f].split(" ·")[0]} do ${BUILD[g.b].short}. Leia o QR Code de um corredor para começar de onde você está.`; m.style.display="block"; } },300);
 }
 
-$("cam").onclick=()=>{
+$("navb").onclick=()=>{
   if(st.sel!=null&&STORES[st.sel]) return openCam(STORES[st.sel],false);
   if(st.list.length){ const o=ensureOrder(); if(o.length) return openCam(o[0],true); }
-  toast("📷 Escolha uma loja (ou monte a lista) e toque aqui para ver o caminho na câmera.",3200);
+  toast("🧭 Escolha uma loja (ou monte a lista) e toque aqui para navegar com a bússola do celular.",3400);
 };
 
 /* ---------- telas do painel ---------- */
@@ -381,7 +381,7 @@ function viewStore(){
   $("sb").innerHTML=`<div class="card"><div class="row" style="gap:10px;flex-wrap:nowrap;align-items:flex-start"><span class="ico" style="background:${tint(s)};width:52px;height:52px;font-size:28px">${s.icon}</span><div><h2>${s.dest?'<span class="star">★</span> ':""}${esc(s.n)}</h2>
     <div class="loc">${esc(B.name)} · ${FLOORS[s.f]} · ${esc(s.cor)}${s.num?` · Loja ${esc(s.num)}`:""}</div></div></div>
     <div class="dsum">🚶 ${mTxt(lg.m)} · ${minTxt(lg.m)}</div>
-    <div class="btns"><button class="btn b" id="camb">📷 Ver o caminho na câmera</button><button class="btn g ${inl?"in":""}" id="addb">${inl?"✓ Na minha lista":"＋ Adicionar à minha lista"}</button></div>
+    <div class="btns"><button class="btn b" id="camb">🧭 Navegar até a loja</button><button class="btn g ${inl?"in":""}" id="addb">${inl?"✓ Na minha lista":"＋ Adicionar à minha lista"}</button></div>
     <div class="stepsbox"><b>Passo a passo</b><ol class="steps">${lg.steps.map(t=>`<li>${t}</li>`).join("")}</ol></div>
     ${lg.warn?`<div class="warn">⚠️ ${lg.warn}</div>`:""}
     ${s.vaga?`<div class="promo" style="background:#fff1c2">🔑 <b>Box disponível para locação.</b>${s.locacao?" "+esc(s.locacao):""}${leaseLink(s)?`<br><a class="btn sm w" style="margin-top:8px" id="lease" href="${leaseLink(s)}" target="_blank" rel="noopener">Tenho interesse ↗</a>`:""}</div>`:""}
@@ -411,7 +411,7 @@ function viewList(){
   const legs=planList(), total=legs.reduce((a,l)=>a+l.m,0);
   $("sb").innerHTML=`<div class="dsum">🚶 Total ${mTxt(total)} · ${minTxt(total)}</div>
     <div class="note" style="margin:2px 0 4px">Ordem a partir da ${refLabel()}.${st.manual?" Você mudou a ordem.":""}</div>
-    <div class="btns" style="margin:6px 0"><button class="btn b" id="lcam">📷 Seguir na câmera</button><button class="btn sm" id="lopt">↻ Mais perto primeiro</button><button class="btn sm" id="lclr">🗑 Limpar</button></div>`
+    <div class="btns" style="margin:6px 0"><button class="btn b" id="lcam">🧭 Navegar pela lista</button><button class="btn sm" id="lopt">↻ Mais perto primeiro</button><button class="btn sm" id="lclr">🗑 Limpar</button></div>`
     + order.map((s,i)=>`<div class="stop"><span class="num">${i+1}</span><div class="mid" data-id="${s.id}"><div class="n">${s.icon} ${esc(s.n)}</div><div class="l">${locTxt(s)} · ${mTxt(legs[i].m)}${i?" da anterior":""}</div></div>
         <button class="mini" data-mv="${i}|-1" aria-label="Subir" ${i?"":"disabled"}>▲</button><button class="mini" data-mv="${i}|1" aria-label="Descer" ${i<n-1?"":"disabled"}>▼</button><button class="mini" data-rm="${s.id}" aria-label="Remover">✕</button></div>
         <details class="sp"><summary>Como chegar</summary><ol class="steps">${legs[i].steps.map(t=>`<li>${t}</li>`).join("")}</ol></details>`).join("")

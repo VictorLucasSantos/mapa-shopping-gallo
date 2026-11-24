@@ -21,7 +21,17 @@ const CSS = `
 #cam .cbot{position:absolute;left:10px;right:10px;bottom:12px;display:flex;gap:6px}
 #cam .cbot button{flex:1;font:inherit;font-size:13px;font-weight:800;padding:13px 6px;border-radius:12px;border:0;background:rgba(255,255,255,.94);color:#1f1a17;cursor:pointer}
 #cam .cbot #cnext{flex:1.6;background:#1a73e8;color:#fff}#cam .cbot #cclose{flex:.6}
-#cam.done #carrow{display:none}`;
+#cam.done #carrow{display:none}
+#cam .ctop,#cam .cbot,#cmsg{z-index:3}
+#ccone{display:none;position:absolute;left:50%;top:50%;width:150px;height:150px;margin:-75px 0 0 -75px;z-index:2;pointer-events:none;transition:transform .15s linear}
+#ccone path{fill:rgba(26,115,232,.38)}
+#cdot{display:none;position:absolute;left:50%;top:50%;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;background:#1a73e8;border:3px solid #fff;box-shadow:0 0 0 2px rgba(26,115,232,.35),0 2px 8px rgba(0,0,0,.45);z-index:2;pointer-events:none}
+#cam.mapmode{background:#f6f1ea}
+#cam.mapmode video,#cam.mapmode #carrow{display:none}
+#cam.mapmode #ccone,#cam.mapmode #cdot{display:block}
+#cam.mapmode #cmini{left:-25%;top:-25%;bottom:auto;width:150%;height:150%;border:0;border-radius:0;box-shadow:none;background:transparent;z-index:1;transition:transform .15s linear;pointer-events:none}
+#cam.mapmode #cmsg{left:10px;right:10px;bottom:74px}
+#cam .cbot #cmode{flex:1.1}`;
 
 function ui() {
   if (el) return el;
@@ -30,14 +40,16 @@ function ui() {
   el.innerHTML = `<video playsinline autoplay muted></video>
     <div class="ctop"><div id="cins"></div><div id="csub"></div><div id="cbar"><i></i></div></div>
     <svg id="carrow" viewBox="-50 -50 100 100"><path d="M0 -44 L28 0 H11 V42 H-11 V0 H-28 Z"/></svg>
-    <svg id="cmini" xmlns="http://www.w3.org/2000/svg"></svg><div id="cmsg"></div>
-    <div class="cbot"><button id="cprev">◀ Voltar</button><button id="calign">🧭 Alinhar</button><button id="cnext">Próximo ▶</button><button id="cclose">✕</button></div>`;
+    <svg id="cmini" xmlns="http://www.w3.org/2000/svg"></svg>
+    <svg id="ccone" viewBox="-50 -50 100 100"><path d="M0 0 L-24 -46 A52 52 0 0 1 24 -46 Z"/></svg><div id="cdot"></div><div id="cmsg"></div>
+    <div class="cbot"><button id="cprev">◀ Voltar</button><button id="cmode">📷 Câmera</button><button id="calign">🧭 Alinhar</button><button id="cnext">Próximo ▶</button><button id="cclose">✕</button></div>`;
   document.body.appendChild(el);
   const $ = id => document.getElementById(id);
   $("cclose").onclick = close;
   $("cnext").onclick = () => step(1);
   $("cprev").onclick = () => step(-1);
   $("calign").onclick = align;
+  $("cmode").onclick = () => setMode(!S.mapMode);
   return el;
 }
 const $ = id => document.getElementById(id);
@@ -83,7 +95,7 @@ function headingOf(e) {
 }
 function onOrient(e) {
   const h = headingOf(e); if (h == null) return;
-  S.heading = S.heading == null ? h : (S.heading + diff(h, S.heading) * 0.25 + 360) % 360; S.compass = true; paintArrow();
+  S.heading = S.heading == null ? h : (S.heading + diff(h, S.heading) * 0.25 + 360) % 360; S.compass = true; paintArrow(); mapSpin();
 }
 /* contador de passos simples (pico de aceleração) */
 function onMotion(e) {
@@ -94,7 +106,7 @@ function onMotion(e) {
 }
 function walked(m) {
   if (!S || S.done) return; const l = S.legs[S.i]; if (!l) return;
-  S.walked += m; paintProgress();
+  S.walked += m; paintProgress(); autoAlign();
   if (S.walked >= l.m - 1) { try { navigator.vibrate && navigator.vibrate(120); } catch (e) {} step(1); }
 }
 function pos() {
@@ -111,14 +123,43 @@ function step(d) {
   }
   if (d > 0) { if (S.i >= S.legs.length - 1) { S.done = true; S.cb.move && S.cb.move(S.store.door, S.g.key); return paint(); } S.i++; }
   else { if (S.done) S.done = false; else if (S.i > 0) S.i--; }
-  S.walked = 0; S.cb.move && S.cb.move(S.legs[S.i].start, S.g.key); paint();
+  S.walked = 0; S.al = []; S.cb.move && S.cb.move(S.legs[S.i].start, S.g.key); paint();
 }
 function align() {
   if (S.heading == null) return note("Este aparelho não informou a bússola. Siga as instruções do texto e use “Próximo” a cada esquina.");
   const l = S.legs[S.i]; if (!l) return;
-  S.north = (S.heading - l.b + 360) % 360;
-  try { const n = JSON.parse(localStorage.getItem("mm_north") || "{}"); n[S.g.key] = S.north; localStorage.setItem("mm_north", JSON.stringify(n)); } catch (e) {}
-  note("Alinhado. A seta agora acompanha o celular.", 2500); paint();
+  setNorth((S.heading - l.b + 360) % 360); note("Alinhado. A seta agora acompanha o celular.", 2500); paint();
+}
+function setNorth(n) {
+  S.north = n; S.al = [];
+  try { const o = JSON.parse(localStorage.getItem("mm_north") || "{}"); o[S.g.key] = n; localStorage.setItem("mm_north", JSON.stringify(o)); } catch (e) {}
+}
+/* sem alinhar: depois de ~6 passos com a bússola firme, assume que a pessoa anda no sentido do trecho e alinha sozinha */
+function autoAlign() {
+  const l = S.legs[S.i]; if (S.north != null || S.heading == null || !S.compass || !l) return;
+  (S.al = S.al || []).push(S.heading); if (S.al.length > 6) S.al.shift(); if (S.al.length < 6) return;
+  const r = Math.PI / 180, x = S.al.reduce((a, h) => a + Math.cos(h * r), 0), y = S.al.reduce((a, h) => a + Math.sin(h * r), 0);
+  const mean = (Math.atan2(y, x) / r + 360) % 360;
+  if (S.al.some(h => Math.abs(diff(h, mean)) > 22)) return;
+  setNorth((mean - l.b + 360) % 360); note("🧭 Mapa alinhado automaticamente pelo seu caminhar. Se a seta parecer errada, toque em Alinhar apontando o celular ao longo do corredor.", 5000); paint();
+}
+/* modo Mapa (estilo Maps): ponto azul fixo no centro, cone da direção, mapa gira para a frente ficar para cima */
+function setMode(map) {
+  S.mapMode = !!map; try { localStorage.setItem("mm_cammode", map ? "map" : "cam"); } catch (e) {}
+  el.classList.toggle("mapmode", S.mapMode); $("cmode").textContent = S.mapMode ? "📷 Câmera" : "🗺️ Mapa";
+  if (!S.mapMode && !S.stream) startCam();
+  paint(); mapSpin();
+}
+function mapSpin() {
+  if (!S || !S.mapMode) return;
+  const l = S.legs[S.i], m = $("cmini"), c = $("ccone");
+  if (S.north != null && S.heading != null) {
+    const mh = (S.heading - S.north + 360) % 360, cur = S.rot == null ? -mh : S.rot, t = -mh;
+    S.rot = cur + (((t - cur) % 360) + 540) % 360 - 180;
+    m.style.transform = `rotate(${S.rot.toFixed(1)}deg)`; c.style.transform = "rotate(0deg)";
+  } else {
+    m.style.transform = "rotate(0deg)"; S.rot = null; c.style.transform = `rotate(${(l && !S.done ? l.b : 0).toFixed(1)}deg)`;
+  }
 }
 function note(t, ms) { const m = $("cmsg"); m.textContent = t; m.style.display = "block"; clearTimeout(note.t); if (ms) note.t = setTimeout(() => m.style.display = "none", ms); }
 
@@ -139,9 +180,10 @@ function paintProgress() {
   mini();
 }
 function mini() {
-  const p = S.done ? S.store.door : pos(), m = $("cmini"), w = 230;
+  const p = S.done ? S.store.door : pos(), m = $("cmini"), w = S.mapMode ? 170 : 230;
   m.setAttribute("viewBox", `${p.x - w / 2} ${p.y - w / 2} ${w} ${w}`);
   m.innerHTML = MM.draw(S.g, { sel: S.store.id, path: S.pts, me: p });
+  mapSpin();
 }
 function paint() {
   el.classList.toggle("done", !!S.done);
@@ -152,7 +194,7 @@ function paint() {
   if (!l) { S.done = true; return paint(); }
   $("cins").innerHTML = `${tag ? tag + " · " : ""}${S.i + 1}/${S.legs.length} · Siga ${l.lane ? "pela" : "por"} <b>${esc(l.name || "este corredor")}</b>`;
   paintArrow(); paintProgress();
-  if (S.north == null) note(S.compass === false ? "Sem bússola: use o texto e o botão “Próximo” a cada esquina." : "Aponte a câmera ao longo do corredor, no sentido da linha azul do mapinha, e toque em 🧭 Alinhar.");
+  if (S.north == null) note(S.compass === false ? "Sem bússola: use o texto e o botão “Próximo” a cada esquina." : S.mapMode ? "Comece a andar pelo corredor, no sentido da linha azul: o mapa se alinha sozinho. Ou aponte o celular ao longo do corredor e toque em 🧭 Alinhar." : "Aponte a câmera ao longo do corredor, no sentido da linha azul do mapinha, e toque em 🧭 Alinhar.");
 }
 
 async function scanLoop() {
@@ -184,7 +226,12 @@ async function open(o) {
   S.oev = "ondeviceorientationabsolute" in W ? "deviceorientationabsolute" : "deviceorientation";
   W.addEventListener(S.oev, onOrient); W.addEventListener("devicemotion", onMotion);
   setTimeout(() => { if (S && S.compass == null) { S.compass = false; if (!S.done) paint(); } }, 2500);
+  S.mapMode = (() => { try { return localStorage.getItem("mm_cammode") !== "cam"; } catch (e) { return true; } })();
+  el.classList.toggle("mapmode", S.mapMode); $("cmode").textContent = S.mapMode ? "📷 Câmera" : "🗺️ Mapa";
   paint();
+  if (!S.mapMode) startCam();
+}
+async function startCam() {
   try {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw new Error("sem câmera");
     const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" } }, audio: false });
@@ -195,7 +242,7 @@ async function open(o) {
   }
 }
 function close() {
-  if (!S) return;
+  if (!S) return; el.classList.remove("mapmode");
   if (S.stream) S.stream.getTracks().forEach(t => t.stop());
   clearInterval(S.scan); W.removeEventListener(S.oev, onOrient); W.removeEventListener("devicemotion", onMotion);
   const v = el.querySelector("video"); v.srcObject = null; el.style.display = "none";
