@@ -152,6 +152,13 @@ footer#bar{display:flex;background:var(--panel);border-top:1px solid var(--line)
 .tab .lb{font-style:normal;font-size:11px;font-weight:900;background:var(--lst);color:#fff;border-radius:999px;padding:1px 6px;margin-left:6px}
 .pin{transform:scale(var(--ps,1))}
 .tint{opacity:.07}
+.mk,.clu{display:none}
+#map.zm .mk{display:block}#map.zf .clu{display:block}
+#map.zm g .zi{display:none}
+#map .mk .pin,#map .clu .pin{transition:transform .15s}
+#map.zm g[data-id]:hover .mk .pin{transform:scale(calc(var(--ps,1)*1.18))}
+#map.zn2 .stip{display:none}
+#map .mk .pin{transform-origin:0 0}
 #map.zf .tint{opacity:.42}#map.zm .tint{opacity:.2}
 #map.zf .zl,#map.zf .zn,#map.zm .zl,#map.zm .zn{display:none}
 #map.zf g:not(.anc) .zi{display:none}
@@ -276,6 +283,8 @@ const pz = MM.panZoom($("map"), $("mapwrap"), {
   view:lod,
   tap(target, p){
     if (st.marking){ markAt(st.v3 ? V().inv(p.x,p.y) : p); return; }
+    const cz = target.closest && target.closest("[data-cz]");
+    if (cz && !st.v3){ const [x,y]=cz.getAttribute("data-cz").split("|").map(Number); centerOn(x,y,430); return; }
     const el = target.closest && target.closest("[data-id]");
     if (el) selectStore(+el.getAttribute("data-id"), false);
   }

@@ -1,5 +1,5 @@
 /* Service worker: rede primeiro, cache como reserva (o app abre sem internet dentro do shopping). */
-const CACHE = "gallomapa-v5";
+const CACHE = "gallomapa-v6";
 const ASSETS = ["./", "index.html", "core.js", "camera.js", "fuse.min.js", "config.js", "lojas-data.js", "manifest.webmanifest", "icon-192.png", "icon-512.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).catch(() => {})); self.skipWaiting(); });
 self.addEventListener("activate", e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
