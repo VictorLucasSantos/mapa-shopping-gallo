@@ -115,6 +115,16 @@ footer#bar{display:flex;background:var(--panel);border-top:1px solid var(--line)
 #bar button.on{color:var(--acc)}
 #bar button.on:before{content:"";position:absolute;top:0;left:30%;right:30%;height:3px;border-radius:0 0 3px 3px;background:var(--acc)}
 #bd{position:absolute;top:3px;left:calc(50% + 6px);background:var(--acc);color:#fff;border-radius:999px;font-size:11px;padding:1px 6px;display:none}
+.gi{width:1em;height:1em;vertical-align:-.14em;flex:none}
+.ico .gi{width:26px;height:26px;vertical-align:0}.cat .e .gi{width:26px;height:26px;vertical-align:0}.tag .gi{width:15px;height:15px;vertical-align:-3px;margin-right:2px}.n .gi{width:16px;height:16px;vertical-align:-3px}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.card,.intro,.grid .cat,.item{animation:rise .28s cubic-bezier(.2,.8,.2,1) both}
+.item,.cat,.btn,.tab,.add{transition:transform .12s,box-shadow .15s,background .15s}
+.item:active,.cat:active,.btn:active{transform:scale(.98)}
+.cat:hover{box-shadow:var(--shadow)}
+.item{border-radius:12px;padding-left:4px;padding-right:4px}
+.ico{box-shadow:inset 0 0 0 1px rgba(0,0,0,.04)}
+@media(prefers-reduced-motion:reduce){.card,.intro,.grid .cat,.item{animation:none}}
 @keyframes dash{to{stroke-dashoffset:-24}}
 @keyframes pulse{0%{r:7;opacity:.5}100%{r:22;opacity:0}}
 @keyframes pulse3{0%{opacity:.4}100%{opacity:0}}
@@ -283,7 +293,7 @@ $("tabs").onclick = e => { const t=e.target.closest(".tab"); if(t) showGroup(t.d
 function renderFilter(){
   const f=$("fchip");
   f.style.display=st.seg?"block":"none";
-  f.innerHTML=st.seg?`<button class="fc" id="fx">${MM.iconOf(st.seg)} ${esc(st.seg)} <span aria-label="Remover filtro">✕</span></button>`:"";
+  f.innerHTML=st.seg?`<button class="fc" id="fx">${MM.icoHTML(st.seg,"currentColor")} ${esc(st.seg)} <span aria-label="Remover filtro">✕</span></button>`:"";
   $("qx").style.display=st.q?"block":"none";
 }
 $("fchip").onclick=()=>{ st.seg=null; st.sel=null; st.view=filtering()?"results":"home"; refresh(true); };
@@ -347,7 +357,7 @@ const wa = n => { let d=String(n).replace(/\D/g,""); if(d.length<=11) d="55"+d; 
 const ig = v => /^https?:/.test(v) ? v : "https://www.instagram.com/"+String(v).replace(/^@/,"")+"/";
 function itemHTML(s,d){
   const inl=st.list.includes(s.s);
-  return `<div class="item" data-id="${s.id}"><span class="ico" style="background:${tint(s)}">${s.icon}</span>
+  return `<div class="item" data-id="${s.id}"><span class="ico" style="background:${tint(s)}">${MM.icoHTML(s.ik)}</span>
     <div class="mid"><div class="n">${s.dest?'<span class="star">★</span> ':""}${esc(s.n)}</div><div class="l">${locTxt(s)}${s.vaga?" · 🔑 para alugar":""}${s.promo?" · 🏷️ promoção":""}</div></div>
     <div class="rt"><span class="dist">${mTxt(d)}</span><button class="add ${inl?"in":""}" data-add="${s.id}" aria-label="${inl?"Remover da lista":"Adicionar à lista"}">${inl?"✓":"＋"}</button></div></div>`;
 }
@@ -360,7 +370,7 @@ function viewHome(){
   const c={}; STORES.forEach(s=>s.cats.forEach(x=>c[x]=(c[x]||0)+1));
   const D=allDist(), near=STORES.filter(s=>s.cats.some(x=>x!=="Serviços")).sort((a,b)=>D.get(a.id)-D.get(b.id)).slice(0,5);
   const intro = lsGet("mm_intro",false) ? "" : `<div class="intro"><b>Como usar</b><ol><li>Escolha o que procura (ou digite na busca).</li><li>Toque em <b>＋</b> para juntar várias lojas na <b>Minha lista</b>.</li><li>Siga a linha azul no mapa — ou use a <b>câmera</b>.</li></ol><button class="btn sm" id="introok">Entendi</button></div>`;
-  $("sb").innerHTML = intro + `<h3>Escolha um tipo de loja</h3><div class="grid">${SEGS.filter(([x])=>c[x]).map(([x])=>`<button class="cat" data-cat="${esc(x)}"><div class="e" style="background:${MM.SEGCOLOR[x]}2b">${MM.iconOf(x)}</div><b>${esc(x)}</b><small>${c[x]} lojas</small></button>`).join("")}</div>`
+  $("sb").innerHTML = intro + `<h3>Escolha um tipo de loja</h3><div class="grid">${SEGS.filter(([x])=>c[x]).map(([x])=>`<button class="cat" data-cat="${esc(x)}"><div class="e" style="background:${MM.SEGCOLOR[x]}2b">${MM.icoHTML(x)}</div><b>${esc(x)}</b><small>${c[x]} lojas</small></button>`).join("")}</div>`
     + `<h3>Mais perto de ${fromPos()?"você":"entrada deste piso"}</h3>${near.map(s=>itemHTML(s,D.get(s.id))).join("")}`
     + (fromPos()?"":`<div class="warn">📍 Marque onde você está (botão no mapa ou aba “Onde estou”) para a lista mostrar o que está realmente perto de você.</div>`) + foot();
   const ok=$("introok"); if(ok) ok.onclick=()=>{ lsSet("mm_intro",true); renderSheet(); };
@@ -378,7 +388,7 @@ function viewResults(){
 function viewStore(){
   const s=STORES[st.sel], B=BUILD[s.b], lg=MM.leg(G,fromPos(),s,"De onde você está,"), inl=st.list.includes(s.s);
   $("st").textContent="Como chegar · "+s.n; $("sm").innerHTML=`<button class="btn sm" id="back" style="height:34px">← Voltar</button>`;
-  $("sb").innerHTML=`<div class="card"><div class="row" style="gap:10px;flex-wrap:nowrap;align-items:flex-start"><span class="ico" style="background:${tint(s)};width:52px;height:52px;font-size:28px">${s.icon}</span><div><h2>${s.dest?'<span class="star">★</span> ':""}${esc(s.n)}</h2>
+  $("sb").innerHTML=`<div class="card"><div class="row" style="gap:10px;flex-wrap:nowrap;align-items:flex-start"><span class="ico" style="background:${tint(s)};width:52px;height:52px;font-size:28px">${MM.icoHTML(s.ik)}</span><div><h2>${s.dest?'<span class="star">★</span> ':""}${esc(s.n)}</h2>
     <div class="loc">${esc(B.name)} · ${FLOORS[s.f]} · ${esc(s.cor)}${s.num?` · Loja ${esc(s.num)}`:""}</div></div></div>
     <div class="dsum">🚶 ${mTxt(lg.m)} · ${minTxt(lg.m)}</div>
     <div class="btns"><button class="btn b" id="camb">🧭 Navegar até a loja</button><button class="btn g ${inl?"in":""}" id="addb">${inl?"✓ Na minha lista":"＋ Adicionar à minha lista"}</button></div>
@@ -386,7 +396,7 @@ function viewStore(){
     ${lg.warn?`<div class="warn">⚠️ ${lg.warn}</div>`:""}
     ${s.vaga?`<div class="promo" style="background:#fff1c2">🔑 <b>Box disponível para locação.</b>${s.locacao?" "+esc(s.locacao):""}${leaseLink(s)?`<br><a class="btn sm w" style="margin-top:8px" id="lease" href="${leaseLink(s)}" target="_blank" rel="noopener">Tenho interesse ↗</a>`:""}</div>`:""}
     ${s.promo?`<div class="promo">🏷️ ${esc(s.promo)}</div>`:""}${s.desc?`<div class="desc">${esc(s.desc)}</div>`:""}
-    <div class="tags">${s.cats.map(c=>`<span class="tag" style="border-left:3px solid ${SEGCOLOR[c]||"#999"}">${MM.iconOf(c)} ${esc(c)}</span>`).join("")}</div>
+    <div class="tags">${s.cats.map(c=>`<span class="tag" style="border-left:3px solid ${SEGCOLOR[c]||"#999"}">${MM.icoHTML(c)} ${esc(c)}</span>`).join("")}</div>
     <div class="btns">
       <button class="btn sm" id="share">🔗 Compartilhar</button>
       <button class="btn sm" id="here">📍 Estou nesta loja</button>
@@ -412,7 +422,7 @@ function viewList(){
   $("sb").innerHTML=`<div class="dsum">🚶 Total ${mTxt(total)} · ${minTxt(total)}</div>
     <div class="note" style="margin:2px 0 4px">Ordem a partir da ${refLabel()}.${st.manual?" Você mudou a ordem.":""}</div>
     <div class="btns" style="margin:6px 0"><button class="btn b" id="lcam">🧭 Navegar pela lista</button><button class="btn sm" id="lopt">↻ Mais perto primeiro</button><button class="btn sm" id="lclr">🗑 Limpar</button></div>`
-    + order.map((s,i)=>`<div class="stop"><span class="num">${i+1}</span><div class="mid" data-id="${s.id}"><div class="n">${s.icon} ${esc(s.n)}</div><div class="l">${locTxt(s)} · ${mTxt(legs[i].m)}${i?" da anterior":""}</div></div>
+    + order.map((s,i)=>`<div class="stop"><span class="num">${i+1}</span><div class="mid" data-id="${s.id}"><div class="n">${MM.icoHTML(s.ik)} ${esc(s.n)}</div><div class="l">${locTxt(s)} · ${mTxt(legs[i].m)}${i?" da anterior":""}</div></div>
         <button class="mini" data-mv="${i}|-1" aria-label="Subir" ${i?"":"disabled"}>▲</button><button class="mini" data-mv="${i}|1" aria-label="Descer" ${i<n-1?"":"disabled"}>▼</button><button class="mini" data-rm="${s.id}" aria-label="Remover">✕</button></div>
         <details class="sp"><summary>Como chegar</summary><ol class="steps">${legs[i].steps.map(t=>`<li>${t}</li>`).join("")}</ol></details>`).join("")
     + (legs[0]&&legs[0].warn?`<div class="warn">⚠️ ${legs[0].warn}</div>`:"") + `<div class="btns"><button class="btn sm" id="lfit">🗺️ Ver no mapa</button></div>`;

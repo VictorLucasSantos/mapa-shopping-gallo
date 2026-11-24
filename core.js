@@ -31,6 +31,10 @@ MM.ICON = {
 MM.MT = { wc: ["🚻", "Banheiro"], escada: ["🪜", "Escada rolante"], elevador: ["🛗", "Elevador"], entrada: ["🚪", "Entrada"], info: ["ℹ️", "Informações"], praca: ["🍴", "Alimentação"], caixa: ["🏧", "Caixa eletrônico"] };
 MM.MARCOS = {};
 MM.iconOf = c => MM.ICON[c] || "🛍️";
+MM.SVGI = {"Feminino": "M9.5 3l-1.5 5 2.5 2L7 21h10l-3.5-11L16 8l-1.5-5M9.5 3c.8 1.2 4.2 1.2 5 0", "Masculino": "M8 3L3 6l2 4 3-1v12h8V9l3 1 2-4-5-3c-.6 1.6-1.8 2.4-4 2.4S8.6 4.6 8 3z", "Jeans": "M7 3h10l1 18h-4.5L12 11l-1.5 10H6L7 3zM7 7h10", "Infantil": "M12 5.2a5 5 0 100 10 5 5 0 000-10zM7.6 5.2a1.9 1.9 0 100-3.8 1.9 1.9 0 000 3.8zM16.4 5.2a1.9 1.9 0 100-3.8 1.9 1.9 0 000 3.8zM7 21c0-3 2-5 5-5s5 2 5 5M12 12.2v.01", "Moda Praia": "M12 8a4 4 0 100 8 4 4 0 000-8zM12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2", "Moda Fitness": "M6 7v10M3.5 9v6M18 7v10M20.5 9v6M6 12h12", "Moda Íntima": "M12 20s-7-4.4-7-10a4 4 0 017-2.4A4 4 0 0119 10c0 5.6-7 10-7 10z", "Plus Size": "M12 3a9 9 0 100 18 9 9 0 000-18zM12 8v8M8 12h8", "Moda Cristã": "M12 3v18M7 8h10", "Social": "M10 3h4l-.8 3.2L15.5 18 12 21l-3.5-3 2.3-11.8L10 3z", "Modinha": "M12 3l2 6 6 2-6 2-2 6-2-6-6-2 6-2z", "Moda Balada": "M5 4h14l-7 8-7-8zM12 12v8M8 20h8", "Acessórios": "M5 8h14l-1 12H6L5 8zM9 8V6a3 3 0 016 0v2", "Calçados": "M3 17v-3c2 0 3-1 4-3l2-4 3 3c1 1 3 1.5 6 2.5 2 .6 3 1.5 3 3V17H3zM3 20h18", "Cosméticos": "M9 21v-7h6v7zM10 14V9h4v5M10.5 9l1-5 2.5 2-.5 3", "Alimentação": "M7 3v7a2 2 0 004 0V3M9 3v18M17 3c-2 1-3 4-3 7h3v11", "Serviços": "M6 17v-6a6 6 0 1112 0v6l2 2H4zM10 21h4", "Outlets": "M3 12V4h8l10 10-8 8L3 12zM7.5 7.5v.01", "Entretenimento": "M3 8h18v12H3zM3 8l3-4h4L7 8M10 8l3-4h4l-3 4", "Estética": "M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5zM18 15l.8 2.2L21 18l-2.2.8L18 21l-.8-2.2L15 18l2.2-.8z", "_vaga": "M8 11a4 4 0 100 8 4 4 0 000-8zM11 12l8-8M15 8l2 2M17 6l2 2", "_def": "M6 7h12l1 13H5L6 7zM9 10V6.5a3 3 0 016 0V10"};
+MM.icoHTML = (k, col) => { const c = col || (k === "_vaga" ? "#c98a00" : MM.SEGCOLOR[k] || "#7d8790"); return `<svg class="gi" viewBox="0 0 24 24" style="color:${c}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${MM.SVGI[k] || MM.SVGI._def}"/></svg>`; };
+MM.icoSvg = (k, x, y, size, col) => `<g transform="translate(${(x - size / 2).toFixed(1)} ${(y - size / 2).toFixed(1)}) scale(${(size / 24).toFixed(3)})" fill="none" stroke="${col}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" pointer-events="none"><path d="${MM.SVGI[k] || MM.SVGI._def}"/></g>`;
+
 const SHOP_T_ORDER = ["Via Mega", "Via Central", "Via Fashion", "Via da Moda", "Via Tendência", "Via Look", "Via Paetê", "Via Tulipa", "Via Acácia", "Via Gérbera", "Alameda dos Eventos", "Alameda Elegante", "Alameda do Sabor", "Alameda Lírio", "Externa 69", "Externa Contorno", "Outros"];
 MM.SYN = [
   [/biquin|bikini|maio|saida de praia|praia|sunga|beach/, "Moda Praia"],
@@ -124,7 +128,7 @@ MM.mk = function (o, i) {
   const om = num.match(/\d+/); const ord = om ? +om[0] : 99999;
   const b = "shopping";
   const prim = cats.find(x => x !== "Feminino") || cats[0] || "Outlets";
-  return { id: i, n: o.n, s: o.s, cats, loc: l, f, cor, num, ord, b, g: b + "|" + f, prim, icon: o.vaga ? "🔑" : MM.iconOf(prim),
+  return { id: i, n: o.n, s: o.s, cats, loc: l, f, cor, num, ord, b, g: b + "|" + f, prim, icon: o.vaga ? "🔑" : MM.iconOf(prim), ik: o.vaga ? "_vaga" : prim,
     desc: o.desc || "", prod: o.prod || "", whats: o.whats || "", insta: o.insta || "", promo: o.promo || "", dest: !!o.dest,
     vaga: !!o.vaga, locacao: o.locacao || "",
     key: norm([o.n, cats.join(" "), cor, num, o.prod, o.desc, o.promo, o.vaga ? "vaga vago box disponivel alugar aluguel locacao" : ""].join(" ")) };
@@ -473,18 +477,18 @@ MM.draw = function (g, o) {
     const col = o.selSeg === s.id ? "#f0b65c" : s.loose ? "#f3c1b8" : s.kind === "link" && o.edit ? "#d9cdbd" : "var(--corr)";
     h += `<line ${o.edit ? `data-h="${s.id}|m"` : ""} x1="${s.x1}" y1="${s.y1}" x2="${s.x2}" y2="${s.y2}" stroke="${col}" stroke-width="${g.cw}" stroke-linecap="round" ${g.bg ? 'opacity=".85"' : ""}/>`;
   }
-  { const e = g.entry; h += `<g ${o.edit ? 'data-h="entry" style="cursor:move"' : ""}><rect x="${e.x - 34}" y="${e.y - 11}" width="68" height="22" rx="6" fill="var(--acc2)"/><text x="${e.x}" y="${e.y + 3.5}" font-size="9" font-weight="800" fill="#fff" text-anchor="middle">Entrada/Escadas</text></g>`; }
+  { const e = g.entry; h += `<g ${o.edit ? 'data-h="entry" style="cursor:move"' : ""}><rect x="${e.x - 44}" y="${e.y - 11}" width="88" height="22" rx="6" fill="var(--acc2)"/><text x="${e.x}" y="${e.y + 3.5}" font-size="9" font-weight="800" fill="#fff" text-anchor="middle">Entrada/Escadas</text></g>`; }
   for (const s of g.stores) {
     const on = !o.filter || o.filter(s), sel = o.sel === s.id, col = MM.SEGCOLOR[s.prim] || "#999";
     const k = Math.min(1, s.bw / 40, s.bh / 30), ls = lines(s.n);
     h += `<g data-id="${s.id}" opacity="${on ? 1 : 0.2}" style="cursor:pointer" transform="translate(${r1(s.cx)} ${r1(s.cy)}) rotate(${r1(s.ang)})">` +
-      `<rect x="${-s.bw / 2}" y="${-s.bh / 2}" width="${s.bw}" height="${s.bh}" rx="4" fill="${sel ? "var(--sel,#fff4d6)" : s.vaga ? "var(--vaga,#fff1c2)" : s.dest ? "var(--dest,#fffaf0)" : "var(--store)"}" stroke="${sel ? "var(--acc)" : s.vaga ? "#c98a00" : s.dest ? "#e2a400" : col}" stroke-width="${sel ? 2.4 : s.dest || s.vaga ? 1.8 : 1}"${s.vaga ? ' stroke-dasharray="4 2"' : ""}/>` +
+      `<rect x="${-s.bw / 2}" y="${-s.bh / 2}" width="${s.bw}" height="${s.bh}" rx="6" fill="${sel ? "var(--sel,#fff4d6)" : s.vaga ? "var(--vaga,#fff1c2)" : s.dest ? "var(--dest,#fffaf0)" : "var(--store)"}" stroke="${sel ? "var(--acc)" : s.vaga ? "#c98a00" : s.dest ? "#e2a400" : col}" stroke-width="${sel ? 2.4 : s.dest || s.vaga ? 1.8 : 1}"${s.vaga ? ' stroke-dasharray="4 2"' : ""}/>` +
       `<rect x="${-s.bw / 2}" y="${-s.bh / 2}" width="${s.bw}" height="4" rx="2" fill="${col}"/>`;
     if (k > 0.45) {
-      h += `<g transform="rotate(${r1(-s.ang)})"><text y="${r1(-7.5 * k)}" font-size="${r1(10 * k)}" text-anchor="middle">${s.icon || ""}</text>` +
+      h += `<g transform="rotate(${r1(-s.ang)})">${MM.icoSvg(s.ik, 0, -10.5 * k, 11 * k, s.vaga ? "#c98a00" : col)}` +
         `<text y="${ls.length > 1 ? r1(1.5 * k) : r1(3.5 * k)}" font-size="${r1(6.2 * k)}" font-weight="700" text-anchor="middle" fill="var(--ink,#2a2420)">${ls.map((t, i) => `<tspan x="0" dy="${i ? r1(7 * k) : 0}">${esc(t)}</tspan>`).join("")}</text>` +
         `<text y="${r1(15 * k)}" font-size="${r1(5.4 * k)}" text-anchor="middle" fill="var(--mut,#8a7d72)">${s.dest ? "★ " : ""}${esc(s.num.slice(0, 12))}</text></g>`;
-    } else if (s.bw >= 9) h += `<g transform="rotate(${r1(-s.ang)})"><text y="${r1(3)}" font-size="9" text-anchor="middle">${s.icon || ""}</text></g>`;
+    } else if (s.bw >= 9) h += `<g transform="rotate(${r1(-s.ang)})">${MM.icoSvg(s.ik, 0, 0, 9, s.vaga ? "#c98a00" : col)}</g>`;
     h += `</g>`;
   }
   for (const L of g.lanes) {
@@ -568,7 +572,7 @@ MM.draw3d = function (g, o) {
     [1, -1].forEach(k => { const a = P(s.x1 + nx * k, s.y1 + ny * k, 0.3), c = P(s.x2 + nx * k, s.y2 + ny * k, 0.3); h += `<line x1="${r1(a.x)}" y1="${r1(a.y)}" x2="${r1(c.x)}" y2="${r1(c.y)}" stroke="${ec}" stroke-width="1" pointer-events="none"/>`; });
   }
   for (const s of g.stores) { if (!s.door) continue; const a = P(s.door.x, s.door.y, 0.5); h += `<ellipse cx="${r1(a.x)}" cy="${r1(a.y)}" rx="3.2" ry="${r1(3.2 * V.K)}" fill="${s.vaga ? "#e2a400" : (D ? "#8f89ff" : "#2b2860")}" opacity=".85" pointer-events="none"/>`; }
-  { const e = g.entry, bx = box(e.x, e.y, 0, 68, 22, 7, "#2b2860", "#2b2860", "#16163f", 0.8); h += bx.h + `<text x="${r1(bx.top.x)}" y="${r1(bx.top.y + 3)}" font-size="8" font-weight="800" fill="#fff" text-anchor="middle" pointer-events="none">Entrada/Escadas</text>`; }
+  { const e = g.entry, bx = box(e.x, e.y, 0, 88, 22, 7, "#2b2860", "#2b2860", "#16163f", 0.8); h += bx.h + `<text x="${r1(bx.top.x)}" y="${r1(bx.top.y + 3)}" font-size="8" font-weight="800" fill="#fff" text-anchor="middle" pointer-events="none">Entrada/Escadas</text>`; }
   const depth = s => { const dx = s.cx - V.cx, dy = s.cy - V.cy; return dx * V.s + dy * V.c; };
   const stores = g.stores.slice().sort((a, b) => depth(a) - depth(b)), tops = {};
   for (const s of stores) {
@@ -578,7 +582,7 @@ MM.draw3d = function (g, o) {
     tops[s.id] = bx.top;
     h += `<g data-id="${s.id}" opacity="${on ? 1 : 0.35}" style="cursor:pointer">${bx.h}`;
     if (on) {
-      h += `<text x="${r1(bx.top.x)}" y="${r1(bx.top.y + 1)}" font-size="${r1(Math.max(8, 11 * k))}" text-anchor="middle" pointer-events="none">${s.icon || ""}</text>`;
+      h += MM.icoSvg(s.ik, bx.top.x, bx.top.y - 2, Math.max(8, 11 * k), s.vaga ? "#c98a00" : (D ? hexMix(col, 255, 0.35) : col));
       if (k > 0.5) h += `<text x="${r1(bx.top.x)}" y="${r1(bx.top.y + 8)}" font-size="${r1(5.8 * k)}" font-weight="700" fill="${INK}" text-anchor="middle" pointer-events="none"${halo}>${esc(lines(s.n)[0])}</text>`;
     }
     h += `</g>`;
