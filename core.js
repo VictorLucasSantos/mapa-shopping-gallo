@@ -536,11 +536,13 @@ MM.draw = function (g, o) {
         `<text class="zl" y="${ls.length > 1 ? r1(1.5 * k) : r1(3.5 * k)}" font-size="${r1(6.2 * k)}" font-weight="700" text-anchor="middle" fill="var(--ink,#2a2420)">${ls.map((t, i) => `<tspan x="0" dy="${i ? r1(7 * k) : 0}">${esc(t)}</tspan>`).join("")}</text>` +
         `<text class="zn" y="${r1(15 * k)}" font-size="${r1(5.4 * k)}" text-anchor="middle" fill="var(--mut,#8a7d72)">${s.dest ? "★ " : ""}${esc(s.num.slice(0, 12))}</text></g>`;
     } else if (s.bw >= 9) h += `<g class="zi" transform="rotate(${r1(-s.ang)})">${MM.icoSvg(s.ik, 0, 0, 9, s.vaga ? "#c98a00" : col)}</g>`;
-    { const ic = MM.icoSvg(s.ik, 0, -19.5, 12.5, "#fff"), badge = s.dest ? "★" : s.vaga ? "🔑" : s.promo ? "%" : "";
-      h += `<g class="mk" transform="rotate(${r1(-s.ang)})">${sel ? `<circle class="pulse" r="10" fill="${col}" pointer-events="none"/>` : ""}<g class="pin">` +
-        `<path d="M0 3C-3-5-11-9-11-17a11 11 0 0122 0C11-9 3-5 0 3z" fill="${s.vaga ? "#c98a00" : col}" stroke="#fff" stroke-width="2.2" style="filter:drop-shadow(0 2px 2px rgba(0,0,0,.35))"/>${ic}` +
-        (badge ? `<circle cx="9" cy="-26" r="6.5" fill="#fff" stroke="${col}" stroke-width="1.3"/><text x="9" y="-23.2" font-size="${badge === "🔑" ? 7 : 8.5}" font-weight="900" text-anchor="middle" fill="${col}">${badge}</text>` : "") +
-        (sel ? `<g class="stip"><rect x="${r1(-(s.n.length * 3.1 + 9))}" y="-52" width="${r1(s.n.length * 6.2 + 18)}" height="17" rx="8.5" fill="var(--acc2,#2b2860)" stroke="#fff" stroke-width="1.5"/><text y="-40.2" font-size="9.5" font-weight="800" text-anchor="middle" fill="#fff">${esc(s.n)}</text></g>` : "") +
+    { const col2 = s.vaga ? "#c98a00" : col, badge = s.dest ? "★" : s.vaga ? "🔑" : s.promo ? "%" : "", fl = "filter:drop-shadow(0 2px 3px rgba(0,0,0,.36))";
+      const label = s.n + (s.num ? " · " + s.num : ""), txt = label.length > 26 ? label.slice(0, 25) + "…" : label, w = Math.round(txt.length * 5.4 + 38), hx = -w / 2;
+      const bd = (x, y) => badge ? `<circle cx="${x}" cy="${y}" r="6" fill="#fff" stroke="${col2}" stroke-width="1.3"/><text x="${x}" y="${y + 2.8}" font-size="${badge === "🔑" ? 7 : 8.5}" font-weight="900" text-anchor="middle" fill="${col2}">${badge}</text>` : "";
+      h += `<g class="mk${sel ? " sel" : ""}" data-s="${s.id}" transform="rotate(${r1(-s.ang)})">${sel ? `<circle class="pulse" r="10" fill="${col2}" pointer-events="none"/>` : ""}<g class="pin">` +
+        `<g class="cm"><circle r="11" fill="${col2}" stroke="#fff" stroke-width="2" style="${fl}"/>${MM.icoSvg(s.ik, 0, 0, 12.5, "#fff")}${bd(8.5, -8.5)}</g>` +
+        `<g class="pl"><rect x="${hx}" y="-12.5" width="${w}" height="25" rx="12.5" fill="var(--glass)" stroke="${col2}" stroke-width="1.6" style="${fl}"/><circle cx="${hx + 12.5}" r="10" fill="${col2}" stroke="#fff" stroke-width="1.8"/>${MM.icoSvg(s.ik, hx + 12.5, 0, 11.5, "#fff")}<text x="${hx + 27}" y="3.7" font-size="10.5" font-weight="800" fill="var(--ink)">${esc(txt)}</text>${bd(hx + w - 4, -10)}</g>` +
+        (sel ? `<g class="stip"><rect x="${r1(-(s.n.length * 3.1 + 9))}" y="-44" width="${r1(s.n.length * 6.2 + 18)}" height="17" rx="8.5" fill="var(--acc2,#2b2860)" stroke="#fff" stroke-width="1.5"/><text y="-32.2" font-size="9.5" font-weight="800" text-anchor="middle" fill="#fff">${esc(s.n)}</text></g>` : "") +
         `</g></g>`; }
     h += `</g>`;
   }

@@ -152,13 +152,23 @@ footer#bar{display:flex;background:var(--panel);border-top:1px solid var(--line)
 .tab .lb{font-style:normal;font-size:11px;font-weight:900;background:var(--lst);color:#fff;border-radius:999px;padding:1px 6px;margin-left:6px}
 .pin{transform:scale(var(--ps,1))}
 .tint{opacity:.07}
-.mk,.clu{display:none}
-#map.zm .mk{display:block}#map.zf .clu{display:block}
-#map.zm g .zi{display:none}
-#map .mk .pin,#map .clu .pin{transition:transform .15s}
-#map.zm g[data-id]:hover .mk .pin{transform:scale(calc(var(--ps,1)*1.18))}
-#map.zn2 .stip{display:none}
+.clu{display:none}#map.zf .clu{display:block}
+.mk .cm,.mk .pl{opacity:0;visibility:hidden;transition:opacity .28s,visibility .28s}
+#map.zm .mk .cm{opacity:1;visibility:visible}
+#map.zn2 .mk .pl{opacity:1;visibility:visible}
+#map.zn2 .mk.co .pl{opacity:0;visibility:hidden}
+#map.zn2 .mk.co .cm{opacity:1;visibility:visible}
+#map .mk.hid .cm,#map .mk.hid .pl{opacity:0!important;visibility:hidden!important}
+#map.zm g .zi,#map.zn2 g .zi,#map.zn2 g .zl,#map.zn2 g .zn{display:none}
+#map .mk .pin,#map .clu .pin{transition:transform .18s cubic-bezier(.2,.8,.2,1),filter .18s}
 #map .mk .pin{transform-origin:0 0}
+#map.zn2 .mk .pin{transform:scale(var(--pls,1))}
+#map g[data-id]:hover .mk .pin,#map .mk.sel .pin{filter:drop-shadow(0 0 7px rgba(255,190,60,.95))}
+#map.zm g[data-id]:hover .mk .pin{transform:scale(calc(var(--ps,1)*1.12))}
+#map.zn2 g[data-id]:hover .mk .pin{transform:scale(calc(var(--pls,1)*1.08))}
+#map g[data-id]:active .mk .pin{transform:scale(calc(var(--ps,1)*1.2))}
+#map.zn2 .stip{display:none}
+#map .mk text,#map .mk .stip text{stroke:none}
 #map.zf .tint{opacity:.42}#map.zm .tint{opacity:.2}
 #map.zf .zl,#map.zf .zn,#map.zm .zl,#map.zm .zn{display:none}
 #map.zf g:not(.anc) .zi{display:none}
@@ -278,6 +288,24 @@ function lod(vb){
   const w=$("mapwrap").clientWidth||360, ppu=w/vb.w, c=ppu<.4?"zf":ppu<.7?"zm":"zn2", m=$("map");
   if(c!==lodC){ lodC=c; m.setAttribute("class",c); }
   m.style.setProperty("--ps",Math.max(1,Math.min(2.8,.8/ppu)).toFixed(2));
+  m.style.setProperty("--pls",Math.max(.3,Math.min(1.2,.85/ppu)).toFixed(2));
+  clearTimeout(lod.t); lod.t=setTimeout(declutter,320);
+}
+/* anti-colisão: nada se sobrepõe. Prioridade: selecionada, lista, destaque, resto. Tenta a pílula; se bater, vira só o ícone; se ainda bater, some até aproximar mais */
+function declutter(){
+  const m=$("map"); if(!m||(lodC!=="zn2"&&lodC!=="zm")) return;
+  const box=$("mapwrap").getBoundingClientRect(), items=[], near=lodC==="zn2";
+  m.querySelectorAll(".mk").forEach(mk=>{ mk.classList.remove("co","hid"); const cm=mk.querySelector(".cm circle"); if(!cm) return;
+    const c=cm.getBoundingClientRect(), pl=mk.querySelector(".pl rect"), p=pl?pl.getBoundingClientRect():c, s=STORES[+mk.dataset.s];
+    const out=r=>r.right<box.left||r.left>box.right||r.bottom<box.top||r.top>box.bottom; if(out(c)&&out(p)) return;
+    items.push({mk,c,p,pr:!s?9:(st.sel===s.id?0:st.list.includes(s.s)?1:s.dest?2:s.vaga?3:4)}); });
+  items.sort((a,b)=>a.pr-b.pr||a.c.top-b.c.top||a.c.left-b.c.left);
+  const placed=[], hit=a=>placed.some(b=>!(a.right+3<b.left||a.left-3>b.right||a.bottom+2<b.top||a.top-2>b.bottom));
+  for(const it of items){
+    if(near&&!hit(it.p)){ placed.push(it.p); continue; }
+    it.mk.classList.add("co");
+    if(!hit(it.c)) placed.push(it.c); else{ it.mk.classList.remove("co"); it.mk.classList.add("hid"); }
+  }
 }
 const pz = MM.panZoom($("map"), $("mapwrap"), {
   view:lod,
@@ -301,6 +329,7 @@ function draw(){
   const stops={}; ensureOrder().forEach((x,i)=>stops[x.id]=i+1);
   const o={fac:!!fac, filter:filtering()?match:null, sel:st.sel, paths, badges, me:st.me&&st.me.g===st.g?st.me:null, stops:Object.keys(stops).length?stops:null};
   $("map").innerHTML = st.v3 ? MM.draw3d(g,Object.assign(o,{V:V()})) : MM.draw(g,o);
+  clearTimeout(lod.t); lod.t=setTimeout(declutter,320);
 }
 function fitRoute(){
   const g=G[st.g], pts=[]; let paths=[];
