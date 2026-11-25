@@ -168,6 +168,8 @@ footer#bar{display:flex;background:var(--panel);border-top:1px solid var(--line)
 #map.zn2 g[data-id]:hover .mk .pin{transform:scale(calc(var(--pls,1)*1.08))}
 #map g[data-id]:active .mk .pin{transform:scale(calc(var(--ps,1)*1.2))}
 #map.zn2 .stip{display:none}
+#map.zf .m3{display:none}
+#map.zn2.v3 g .zl,#map.zn2.v3 g .zn{display:inline}
 #map .mk text,#map .mk .stip text{stroke:none}
 #map.zf .tint{opacity:.42}#map.zm .tint{opacity:.2}
 #map.zf .zl,#map.zf .zn,#map.zm .zl,#map.zm .zn{display:none}
@@ -286,14 +288,15 @@ const V = () => MM.proj3(G[st.g], st.rot);
 let lodC="";
 function lod(vb){
   const w=$("mapwrap").clientWidth||360, ppu=w/vb.w, c=ppu<.4?"zf":ppu<.7?"zm":"zn2", m=$("map");
-  if(c!==lodC){ lodC=c; m.setAttribute("class",c); }
+  const ck=c+(st.v3?" v3":"");
+  if(ck!==lodC){ lodC=ck; m.setAttribute("class",ck); }
   m.style.setProperty("--ps",Math.max(1,Math.min(2.8,.8/ppu)).toFixed(2));
   m.style.setProperty("--pls",Math.max(.3,Math.min(1.2,.85/ppu)).toFixed(2));
   clearTimeout(lod.t); lod.t=setTimeout(declutter,320);
 }
 /* anti-colisão: nada se sobrepõe. Prioridade: selecionada, lista, destaque, resto. Tenta a pílula; se bater, vira só o ícone; se ainda bater, some até aproximar mais */
 function declutter(){
-  const m=$("map"); if(!m||(lodC!=="zn2"&&lodC!=="zm")) return;
+  const m=$("map"); if(!m||st.v3||(lodC!=="zn2"&&lodC!=="zm")) return;
   const box=$("mapwrap").getBoundingClientRect(), items=[], near=lodC==="zn2";
   m.querySelectorAll(".mk").forEach(mk=>{ mk.classList.remove("co","hid"); const cm=mk.querySelector(".cm circle"); if(!cm) return;
     const c=cm.getBoundingClientRect(), pl=mk.querySelector(".pl rect"), p=pl?pl.getBoundingClientRect():c, s=STORES[+mk.dataset.s];
@@ -329,6 +332,7 @@ function draw(){
   const stops={}; ensureOrder().forEach((x,i)=>stops[x.id]=i+1);
   const o={fac:!!fac, filter:filtering()?match:null, sel:st.sel, paths, badges, me:st.me&&st.me.g===st.g?st.me:null, stops:Object.keys(stops).length?stops:null};
   $("map").innerHTML = st.v3 ? MM.draw3d(g,Object.assign(o,{V:V()})) : MM.draw(g,o);
+  try{ lod(pz.vb()); }catch(e){}
   clearTimeout(lod.t); lod.t=setTimeout(declutter,320);
 }
 function fitRoute(){

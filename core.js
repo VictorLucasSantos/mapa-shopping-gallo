@@ -641,8 +641,9 @@ MM.draw3d = function (g, o) {
     tops[s.id] = bx.top;
     h += `<g data-id="${s.id}" opacity="${on ? 1 : 0.35}" style="cursor:pointer">${bx.h}`;
     if (on) {
-      h += MM.icoSvg(s.ik, bx.top.x, bx.top.y - 2, Math.max(8, 11 * k), s.vaga ? "#c98a00" : (D ? hexMix(col, 255, 0.35) : col));
-      if (k > 0.5) h += `<text x="${r1(bx.top.x)}" y="${r1(bx.top.y + 8)}" font-size="${r1(5.8 * k)}" font-weight="700" fill="${INK}" text-anchor="middle" pointer-events="none"${halo}>${esc(lines(s.n)[0])}</text>`;
+      { const col2 = s.vaga ? "#c98a00" : col, rr = Math.max(8, 10.5 * k);
+        h += `<g class="m3"><circle cx="${r1(bx.top.x)}" cy="${r1(bx.top.y - 2)}" r="${r1(rr)}" fill="${col2}" stroke="#fff" stroke-width="2" style="filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))"/>${MM.icoSvg(s.ik, bx.top.x, bx.top.y - 2, rr * 1.15, "#fff")}</g>`; }
+      if (k > 0.5) h += `<text class="zl" x="${r1(bx.top.x)}" y="${r1(bx.top.y + 8)}" font-size="${r1(5.8 * k)}" font-weight="700" fill="${INK}" text-anchor="middle" pointer-events="none"${halo}>${esc(lines(s.n)[0])}</text>`;
     }
     h += `</g>`;
   }
