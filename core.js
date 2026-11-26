@@ -189,7 +189,7 @@ function schematic(g) {
   const P = (u, v) => vert ? { x: v, y: u } : { x: u, y: v };
   const cols = Math.max(3, ...g.lanes.map(L => Math.ceil(L.list.length / 2)));
   const sA = SP, sB = U0 + cols * CELL + SP, n = g.lanes.length;
-  g.cw = CW; g.depth = SH; g.mpu = 0.09; g.bg = null; g.custom = false; g.segs = [];
+  g.cw = CW; g.depth = SH; g.mpu = 0.09; g.bg = null; g.custom = false; g.segs = []; g.shapes = [];
   g.lanes.forEach((L, i) => {
     const v = 70 + i * LANE, a = P(sA, v), b = P(sB, v);
     L.seg = { id: "L:" + L.slug, name: L.name, kind: "lane", x1: a.x, y1: a.y, x2: b.x, y2: b.y };
@@ -202,6 +202,7 @@ function schematic(g) {
 }
 function custom(g, lay) {
   g.custom = true; g.cw = lay.cw || CW; g.depth = lay.depth || SH; g.mpu = lay.mpu || 0.09; g.bg = lay.bg || null; g.segs = [];
+  g.shapes = (lay.shapes || []).filter(s => s && s.pts && s.pts.length >= 3).map(s => Object.assign({}, s));
   let maxY = g.bg ? g.bg.h : 0;
   for (const k in lay.lanes) maxY = Math.max(maxY, lay.lanes[k].y1, lay.lanes[k].y2);
   (lay.links || []).forEach(k => { maxY = Math.max(maxY, k.y1, k.y2); });
@@ -234,6 +235,39 @@ function place(g) {
     });
   }
 }
+/* planta desenhada: polígonos de lojas/áreas. Loja vinculada (s = slug) ganha a forma real, centro e porta no corredor mais perto */
+MM.polyInfo = function (pts) {
+  let a = 0, cx = 0, cy = 0, x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (let i = 0; i < pts.length; i++) {
+    const [xa, ya] = pts[i], [xb, yb] = pts[(i + 1) % pts.length], f = xa * yb - xb * ya;
+    a += f; cx += (xa + xb) * f; cy += (ya + yb) * f;
+    x0 = Math.min(x0, xa); y0 = Math.min(y0, ya); x1 = Math.max(x1, xa); y1 = Math.max(y1, ya);
+  }
+  a /= 2; if (Math.abs(a) < 1e-6) { cx = (x0 + x1) / 2; cy = (y0 + y1) / 2; } else { cx /= 6 * a; cy /= 6 * a; }
+  /* centro fora do polígono (forma em L/U): usa o ponto interno mais central da linha do meio */
+  if (!MM.inPoly(cx, cy, pts)) { const ym = cy, xs = [];
+    for (let i = 0; i < pts.length; i++) { const [xa, ya] = pts[i], [xb, yb] = pts[(i + 1) % pts.length]; if ((ya > ym) !== (yb > ym)) xs.push(xa + (ym - ya) * (xb - xa) / (yb - ya)); }
+    xs.sort((p, q) => p - q); let best = 0; for (let i = 0; i + 1 < xs.length; i += 2) if (xs[i + 1] - xs[i] > best) { best = xs[i + 1] - xs[i]; cx = (xs[i] + xs[i + 1]) / 2; } }
+  return { cx, cy, area: Math.abs(a), x0, y0, x1, y1, w: x1 - x0, h: y1 - y0 };
+};
+MM.inPoly = function (x, y, pts) {
+  let o = false;
+  for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) { const [xi, yi] = pts[i], [xj, yj] = pts[j]; if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) o = !o; }
+  return o;
+};
+function shapes(g) {
+  g.plan = g.shapes.length > 0; g.hasArea = g.shapes.some(s => s.k === "area");
+  const by = {}; for (const s of g.stores) by[s.s] = s;
+  for (const sh of g.shapes) {
+    const st = sh.k === "loja" && sh.s ? by[sh.s] : null; sh.st = st || null;
+    const inf = MM.polyInfo(sh.pts); sh.cx = inf.cx; sh.cy = inf.cy; sh.w = inf.w; sh.h = inf.h;
+    if (!st) continue;
+    st.poly = sh.pts.map(([x, y]) => [x - inf.cx, y - inf.cy]); st.cx = inf.cx; st.cy = inf.cy; st.ang = 0;
+    st.bw = Math.max(12, Math.min(inf.w, 160)); st.bh = Math.max(12, Math.min(inf.h, 120)); st.big = Math.min(inf.w, inf.h);
+    const q = sh.d ? { x: sh.d[0], y: sh.d[1] } : (MM.nearest(g, { x: inf.cx, y: inf.cy }) || { x: inf.cx, y: inf.cy });
+    st.door = { x: q.x, y: q.y }; st.shape = sh.id;
+  }
+}
 MM.build = function (raw, layouts) {
   MM.MARCOS = (layouts && layouts.marcos) || {};
   const stores = raw.map(MM.mk), G = {};
@@ -248,6 +282,7 @@ MM.build = function (raw, layouts) {
     const lay = layouts && layouts[g.key];
     if (lay && lay.lanes) custom(g, lay); else schematic(g);
     place(g);
+    shapes(g);
   }
   return { stores, G };
 };
@@ -256,7 +291,8 @@ MM.groupOrder = function (G) {
   return Object.keys(G).sort((a, b) => { const [ba, fa] = a.split("|"), [bb, fb] = b.split("|"); return MM.BORDER.indexOf(ba) - MM.BORDER.indexOf(bb) || fo.indexOf(fa) - fo.indexOf(fb); });
 };
 MM.layoutOf = function (g) {
-  const lay = { v: 1, cw: g.cw, depth: g.depth, mpu: g.mpu, bg: g.bg || null, lanes: {}, links: [], entry: { x: r1(g.entry.x), y: r1(g.entry.y) } };
+  const lay = { v: 1, cw: g.cw, depth: g.depth, mpu: g.mpu, bg: g.bg || null, lanes: {}, links: [], entry: { x: r1(g.entry.x), y: r1(g.entry.y) },
+    shapes: (g.shapes || []).map(s => { const o = { id: s.id, k: s.k || "loja", pts: s.pts.map(([x, y]) => [r1(x), r1(y)]) }; if (s.s) o.s = s.s; if (s.t) o.t = s.t; if (s.d) o.d = s.d; return o; }) };
   for (const s of g.segs) {
     const q = { x1: r1(s.x1), y1: r1(s.y1), x2: r1(s.x2), y2: r1(s.y2) };
     if (s.kind === "lane") lay.lanes[s.id.slice(2)] = q; else lay.links.push(Object.assign({ id: s.id.slice(2), name: s.name }, q));
@@ -269,6 +305,7 @@ MM.bounds = function (g) {
   const pad = g.cw / 2 + g.depth + 14;
   for (const s of g.segs) { add(s.x1, s.y1, pad); add(s.x2, s.y2, pad); }
   add(g.entry.x, g.entry.y, 44);
+  for (const sh of g.shapes || []) for (const [x, y] of sh.pts) add(x, y, 8);
   if (g.bg) { add(0, 0, 0); add(g.bg.w, g.bg.h, 0); }
   return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
 };
@@ -326,9 +363,12 @@ MM.route = function (g, from, to) {
   const r = solve(g, from, [to]);
   if (!r || r.Ds[0] < 0 || r.dist[r.Ds[0]] === Infinity) return null;
   const D = r.Ds[0], { nodes, prev, segs } = r, pts = [], es = [];
-  for (let v = D; v != null; v = prev[v] ? prev[v].u : null) { pts.unshift(nodes[v]); if (prev[v]) es.unshift({ si: prev[v].si, len: Math.hypot(nodes[v].x - nodes[prev[v].u].x, nodes[v].y - nodes[prev[v].u].y) }); }
-  const legs = [];
-  for (const e of es) { const l = legs[legs.length - 1]; if (l && l.seg === segs[e.si]) l.len += e.len; else legs.push({ seg: segs[e.si], len: e.len }); }
+  for (let v = D; v != null; v = prev[v] ? prev[v].u : null) { pts.unshift(nodes[v]); if (prev[v]) { const a = nodes[prev[v].u], b = nodes[v], len = Math.hypot(b.x - a.x, b.y - a.y); es.unshift({ si: prev[v].si, len, a, b, dir: len ? [(b.x - a.x) / len, (b.y - a.y) / len] : null }); } }
+  /* junta trechos do mesmo corredor (e da rede desenhada) quando quase não há curva; guarda a direção de entrada/saída para "vire à direita/esquerda" */
+  const legs = [], ang = (p, q) => p && q ? Math.acos(Math.max(-1, Math.min(1, p[0] * q[0] + p[1] * q[1]))) * 180 / Math.PI : 0;
+  for (const e of es) { const l = legs[legs.length - 1], sg = segs[e.si];
+    if (l && (l.seg === sg || (l.seg.name === sg.name && l.seg.kind === sg.kind && ang(l.d1, e.dir) < 40))) { l.len += e.len; l.p1 = e.b; if (e.dir && e.len > 1) l.d1 = e.dir; }
+    else legs.push({ seg: sg, len: e.len, d0: e.dir, d1: e.dir, p0: e.a, p1: e.b }); }
   return { pts, legs, len: r.dist[D] };
 };
 /* distâncias (em unidades do mapa) de um ponto até várias portas, com um único cálculo por piso */
@@ -342,13 +382,22 @@ MM.walk = function (g, from, s, label) {
   const r = MM.route(g, from, s.door), steps = [];
   const arrive = side => `Chegou: <b>${esc(s.n)}</b>${s.num ? ` — loja <b>${esc(s.num)}</b>` : ""}${side ? ", " + side : ""}.`;
   if (!r) { steps.push(`${label} vá até a <b>${esc(s.lane.name)}</b>.`); steps.push(arrive("")); return { pts: [from, s.door], steps }; }
-  const legs = r.legs.filter(l => l.len * g.mpu >= 1.5);
+  /* trechos curtos (ziguezague da rede desenhada) entram no trecho anterior; a curva é medida pela direção geral de cada trecho */
+  const legs = [];
+  for (const l0 of r.legs) { const l = Object.assign({}, l0), p = legs[legs.length - 1];
+    const dirOf = q => { const dx = q.p1.x - q.p0.x, dy = q.p1.y - q.p0.y, n = Math.hypot(dx, dy) || 1; return [dx / n, dy / n]; };
+    if (p && (l.len * g.mpu < 7 || (p.seg.name === l.seg.name && p.seg.kind === l.seg.kind && (() => { const a = dirOf(p), b = dirOf(l); return a[0] * b[0] + a[1] * b[1] > 0.85; })()))) { p.len += l.len; p.p1 = l.p1; continue; }
+    legs.push(l); }
+  legs.forEach(l => { if (l.p0 && l.p1) { const dx = l.p1.x - l.p0.x, dy = l.p1.y - l.p0.y, n = Math.hypot(dx, dy) || 1; l.d0 = l.d1 = [dx / n, dy / n]; } });
+  if (legs.length && legs[0].len * g.mpu < 1.5) legs.shift();
   const via = l => l.seg.kind === "lane" ? `pela <b>${esc(l.seg.name)}</b>` : (/^corredor|^passarela|^escada|^hall/i.test(l.seg.name) ? "pelo" : "por") + ` <b>${esc(l.seg.name)}</b>`;
   legs.forEach((l, i) => {
     const m = MM.meters(l.len, g);
     if (i === 0) steps.push(`${label} siga ${via(l)} por ~${m} m.`);
-    else if (l.seg.kind === "lane") steps.push(`Entre na <b>${esc(l.seg.name)}</b> e ande ~${m} m.`);
-    else steps.push(`Continue ${via(l)} por ~${m} m.`);
+    else { const p = legs[i - 1], a = p.d1, b = l.d0; let turn = "";
+      if (a && b) { const cr = a[0] * b[1] - a[1] * b[0], dt = a[0] * b[0] + a[1] * b[1]; if (dt < 0.82) turn = (cr > 0 ? "Vire " + (dt < -0.5 ? "bem " : "") + "à direita" : "Vire " + (dt < -0.5 ? "bem " : "") + "à esquerda"); }
+      if (l.seg.kind === "lane") steps.push(`${turn ? turn + " e entre" : "Entre"} na <b>${esc(l.seg.name)}</b> e ande ~${m} m.`);
+      else steps.push(turn ? `${turn} e siga ${via(l)} por ~${m} m.` : `Continue ${via(l)} por ~${m} m.`); }
   });
   if (!legs.length) steps.push(`${label} a loja está a poucos passos, na <b>${esc(s.lane.name)}</b>.`);
   let side = "";
@@ -518,19 +567,37 @@ function routeSvg(paths) {
 MM.draw = function (g, o) {
   o = o || {}; let h = "";
   const paths = o.paths || (o.path ? [o.path] : []);
-  if (g.bg) h += `<image href="${g.bg.src}" x="0" y="0" width="${g.bg.w}" height="${g.bg.h}" opacity="${o.edit ? 0.75 : 0.45}" preserveAspectRatio="none"/>`;
+  if (g.bg && (o.edit || !g.plan)) h += `<image href="${g.bg.src}" x="0" y="0" width="${g.bg.w}" height="${g.bg.h}" opacity="${o.edit ? (g.plan ? 0.35 : 0.75) : 0.45}" preserveAspectRatio="none"/>`;
+  const SHC = { area: "var(--corr)", praca: "var(--praca,#efe6d2)", bloco: "var(--block,#ddd6cc)", loja: "var(--store)" };
+  const ptsS = (pts, dx, dy) => pts.map(([x, y]) => r1(x - (dx || 0)) + "," + r1(y - (dy || 0))).join(" ");
+  /* chão: áreas comuns e praças primeiro */
+  for (const sh of g.shapes || []) if (sh.k === "area" || sh.k === "praca") {
+    const sel = o.selSeg === "S:" + sh.id;
+    h += `<polygon ${o.edit ? `data-h="S:${sh.id}|m" style="cursor:move"` : 'pointer-events="none"'} points="${ptsS(sh.pts)}" fill="${SHC[sh.k]}" stroke="${sel ? "#e65100" : o.edit ? "rgba(0,0,0,.18)" : "none"}" stroke-width="${sel ? 2.5 : 1}" stroke-linejoin="round"/>`;
+    if (sh.t) h += `<text class="zc" x="${r1(sh.cx)}" y="${r1(sh.cy + 4)}" font-size="${r1(Math.max(9, Math.min(16, sh.w / (sh.t.length * 0.7))))}" font-weight="900" fill="var(--acc2)" text-anchor="middle" pointer-events="none" letter-spacing=".5">${esc(sh.t.toUpperCase())}</text>`;
+  }
   for (const s of g.segs) {
     const col = o.selSeg === s.id ? "#f0b65c" : s.loose ? "#f3c1b8" : s.kind === "link" && o.edit ? "#d9cdbd" : "var(--corr)";
-    h += `<line ${o.edit ? `data-h="${s.id}|m"` : ""} x1="${s.x1}" y1="${s.y1}" x2="${s.x2}" y2="${s.y2}" stroke="${col}" stroke-width="${g.cw}" stroke-linecap="round" ${g.bg ? 'opacity=".85"' : ""}/>`;
+    const op = g.hasArea ? (o.edit ? (o.selSeg === s.id ? 0.9 : 0.45) : 0) : g.bg ? 0.85 : 1;
+    h += `<line ${o.edit ? `data-h="${s.id}|m"` : 'pointer-events="none"'} x1="${s.x1}" y1="${s.y1}" x2="${s.x2}" y2="${s.y2}" stroke="${col}" stroke-width="${g.hasArea && o.edit ? Math.min(g.cw, 10) : g.cw}" stroke-linecap="round" opacity="${op}"/>`;
+  }
+  for (const sh of g.shapes || []) if (sh.k === "bloco" || (sh.k === "loja" && (!sh.st || o.edit))) {
+    const sel = o.selSeg === "S:" + sh.id, nm = sh.st ? sh.st.n : sh.t || "";
+    h += `<polygon ${o.edit ? `data-h="S:${sh.id}|m" style="cursor:move"` : 'pointer-events="none"'} points="${ptsS(sh.pts)}" fill="${sh.k === "bloco" ? SHC.bloco : o.edit && !sh.st ? "#fff7e8" : SHC.loja}" stroke="${sel ? "#e65100" : o.edit && !sh.st && sh.k === "loja" ? "#d08a2c" : "var(--line,#d8cfc2)"}" stroke-width="${sel ? 2.6 : 1.2}" stroke-linejoin="round"${o.edit && !sh.st && sh.k === "loja" ? ' stroke-dasharray="5 3"' : ""}/>`;
+    if (nm || o.edit) { const fs = Math.max(6.5, Math.min(15, Math.min(sh.w / Math.max(4, (nm || "?").length * 0.62), sh.h * 0.32)));
+      h += `<text x="${r1(sh.cx)}" y="${r1(sh.cy + fs * 0.35)}" font-size="${r1(fs)}" font-weight="800" fill="${sh.st ? "var(--ink)" : "var(--mut)"}" text-anchor="middle" pointer-events="none">${esc(nm || (sh.k === "loja" ? "sem loja" : ""))}</text>`; }
   }
   { const e = g.entry; h += `<g ${o.edit ? 'data-h="entry" style="cursor:move"' : ""}><rect x="${e.x - 44}" y="${e.y - 11}" width="88" height="22" rx="6" fill="var(--acc2)"/><text x="${e.x}" y="${e.y + 3.5}" font-size="9" font-weight="800" fill="#fff" text-anchor="middle">Entrada/Escadas</text></g>`; }
   for (const s of g.stores) {
     const on = !o.filter || o.filter(s), sel = o.sel === s.id, col = MM.SEGCOLOR[s.prim] || "#999";
-    const k = Math.min(1, s.bw / 40, s.bh / 30), ls = lines(s.n);
-    h += `<g data-id="${s.id}" class="${s.dest || s.prim === "Alimentação" ? "anc" : ""}" opacity="${on ? 1 : 0.2}" style="cursor:pointer" transform="translate(${r1(s.cx)} ${r1(s.cy)}) rotate(${r1(s.ang)})">` +
-      `<rect x="${-s.bw / 2}" y="${-s.bh / 2}" width="${s.bw}" height="${s.bh}" rx="6" fill="${sel ? "var(--sel,#fff4d6)" : s.vaga ? "var(--vaga,#fff1c2)" : s.dest ? "var(--dest,#fffaf0)" : "var(--store)"}" stroke="${sel ? "var(--acc)" : s.vaga ? "#c98a00" : s.dest ? "#e2a400" : col}" stroke-width="${sel ? 2.4 : s.dest || s.vaga ? 1.8 : 1}"${s.vaga ? ' stroke-dasharray="4 2"' : ""}/>` +
+    if (s.poly && o.edit) continue;
+    const k = s.poly ? Math.max(0.7, Math.min(1.9, Math.min(s.bw / 46, s.bh / 34))) : Math.min(1, s.bw / 40, s.bh / 30), ls = lines(s.n);
+    h += `<g data-id="${s.id}" class="${s.dest || s.prim === "Alimentação" || s.big > 90 ? "anc" : ""}" opacity="${on ? 1 : 0.2}" style="cursor:pointer" transform="translate(${r1(s.cx)} ${r1(s.cy)}) rotate(${r1(s.ang)})">` +
+      (s.poly ? `<polygon points="${ptsS(s.poly)}" fill="${sel ? "var(--sel,#fff4d6)" : s.vaga ? "var(--vaga,#fff1c2)" : s.dest ? "var(--dest,#fffaf0)" : "var(--store)"}" stroke="${sel ? "var(--acc)" : s.vaga ? "#c98a00" : s.dest ? "#e2a400" : "var(--line,#d8cfc2)"}" stroke-width="${sel ? 2.6 : s.dest || s.vaga ? 1.8 : 1.2}" stroke-linejoin="round"${s.vaga ? ' stroke-dasharray="4 2"' : ""}/>` +
+        `<polygon class="tint" points="${ptsS(s.poly)}" fill="${col}" pointer-events="none"/>`
+      : `<rect x="${-s.bw / 2}" y="${-s.bh / 2}" width="${s.bw}" height="${s.bh}" rx="6" fill="${sel ? "var(--sel,#fff4d6)" : s.vaga ? "var(--vaga,#fff1c2)" : s.dest ? "var(--dest,#fffaf0)" : "var(--store)"}" stroke="${sel ? "var(--acc)" : s.vaga ? "#c98a00" : s.dest ? "#e2a400" : col}" stroke-width="${sel ? 2.4 : s.dest || s.vaga ? 1.8 : 1}"${s.vaga ? ' stroke-dasharray="4 2"' : ""}/>` +
       `<rect class="tint" x="${-s.bw / 2}" y="${-s.bh / 2}" width="${s.bw}" height="${s.bh}" rx="6" fill="${col}" pointer-events="none"/>` +
-      `<rect x="${-s.bw / 2}" y="${-s.bh / 2}" width="${s.bw}" height="4" rx="2" fill="${col}"/>`;
+      `<rect x="${-s.bw / 2}" y="${-s.bh / 2}" width="${s.bw}" height="4" rx="2" fill="${col}"/>`);
     if (k > 0.45) {
       h += `<g transform="rotate(${r1(-s.ang)})"><g class="zi">${MM.icoSvg(s.ik, 0, -10.5 * k, 11 * k, s.vaga ? "#c98a00" : col)}</g>` +
         `<text class="zl" y="${ls.length > 1 ? r1(1.5 * k) : r1(3.5 * k)}" font-size="${r1(6.2 * k)}" font-weight="700" text-anchor="middle" fill="var(--ink,#2a2420)">${ls.map((t, i) => `<tspan x="0" dy="${i ? r1(7 * k) : 0}">${esc(t)}</tspan>`).join("")}</text>` +
@@ -564,7 +631,13 @@ MM.draw = function (g, o) {
   if (o.me) h += `<g transform="translate(${o.me.x} ${o.me.y})" pointer-events="none"><g class="pin"><circle class="pulse" r="8" fill="var(--me)"/><circle r="9" fill="var(--me)" stroke="#fff" stroke-width="3"/><circle r="3" fill="#fff"/></g></g>`;
   for (const m of (MM.MARCOS[g.key] || [])) { const t = MM.MT[m.t]; if (t) h += `<g ${o.edit ? `data-h="M:${m.id}|m" style="cursor:move"` : 'pointer-events="none"'}><circle cx="${r1(m.x)}" cy="${r1(m.y)}" r="${o.edit ? 13 : 9.5}" fill="var(--panel,#fff)" stroke="${o.selSeg === "M:" + m.id ? "#e65100" : "var(--acc2,#2b2860)"}" stroke-width="${o.selSeg === "M:" + m.id ? 3.2 : 1.8}"/><text x="${r1(m.x)}" y="${r1(m.y + 4)}" font-size="11" text-anchor="middle">${t[0]}</text></g>`; }
   if (o.qr) for (const p of o.qr) h += `<g pointer-events="none"><rect x="${p.x - 5}" y="${p.y - 5}" width="10" height="10" rx="2" fill="#111"/><rect x="${p.x - 2.5}" y="${p.y - 2.5}" width="5" height="5" fill="#fff"/></g>`;
+  if (o.edit && o.selSeg && o.selSeg.startsWith("S:")) { const sh = (g.shapes || []).find(x => "S:" + x.id === o.selSeg);
+    if (sh) sh.pts.forEach(([x, y], i) => { const [x2, y2] = sh.pts[(i + 1) % sh.pts.length];
+      h += `<circle class="hd hm" data-h="S:${sh.id}|a${i}" cx="${r1((x + x2) / 2)}" cy="${r1((y + y2) / 2)}" r="5" fill="#fff" stroke="#e65100" stroke-width="2" style="cursor:copy"/>`;
+      h += `<circle class="hd hv" data-h="S:${sh.id}|v${i}" cx="${r1(x)}" cy="${r1(y)}" r="7" fill="#e65100" stroke="#fff" stroke-width="2.5" style="cursor:move"/>`; }); }
+  if (o.draft && o.draft.length) { const d = o.draft; h += `<polyline points="${ptsS(d)}" fill="rgba(230,81,0,.12)" stroke="#e65100" stroke-width="2" stroke-dasharray="6 4" pointer-events="none"/>` + d.map(([x, y], i) => `<circle class="hd" cx="${r1(x)}" cy="${r1(y)}" r="${i ? 5 : 8}" fill="${i ? "#e65100" : "#fff"}" stroke="#e65100" stroke-width="2.5" pointer-events="none"/>`).join(""); }
   if (o.edit) for (const s of g.segs.filter(x => x.kind === "link").concat(g.segs.filter(x => x.kind === "lane"))) for (const k of [1, 2]) {
+    if (g.hasArea && o.selSeg !== s.id) continue;
     h += `<circle class="hd" data-h="${s.id}|${k}" cx="${s["x" + k]}" cy="${s["y" + k]}" r="8" fill="${s.kind === "lane" ? "var(--acc2)" : "var(--acc)"}" stroke="#fff" stroke-width="2.5" style="cursor:move"/>`;
   }
   return h;
@@ -592,13 +665,15 @@ MM.draw3d = function (g, o) {
   const vis = (nx, ny) => (nx * V.s + ny * V.c) * V.K > 0.001;
   const D = !!MM.dark, INK = D ? "#f2f1fb" : "#2a2420";
   const halo = ` paint-order="stroke" stroke="${D ? "#14132e" : "#fff"}" stroke-width="1.6" stroke-linejoin="round"`;
-  const box = (cx, cy, ang, bw, bh, H, topFill, sideCol, stroke, sw) => {
+  const box = (cx, cy, ang, bw, bh, H, topFill, sideCol, stroke, sw, pts) => {
     const a = ang * Math.PI / 180, ca = Math.cos(a), sa = Math.sin(a);
-    const loc = [[-bw / 2, -bh / 2], [bw / 2, -bh / 2], [bw / 2, bh / 2], [-bw / 2, bh / 2]].map(([x, y]) => ({ x: cx + x * ca - y * sa, y: cy + x * sa + y * ca }));
-    let h = "";
-    [[0, -1], [1, 0], [0, 1], [-1, 0]].forEach(([x, y], i) => {
-      const nx = x * ca - y * sa, ny = x * sa + y * ca; if (!vis(nx, ny)) return;
-      const A = loc[i], B = loc[(i + 1) % 4], lx = nx * V.c - ny * V.s;
+    const loc = pts ? pts.map(([x, y]) => ({ x: cx + x, y: cy + y })) : [[-bw / 2, -bh / 2], [bw / 2, -bh / 2], [bw / 2, bh / 2], [-bw / 2, bh / 2]].map(([x, y]) => ({ x: cx + x * ca - y * sa, y: cy + x * sa + y * ca }));
+    let h = "", ar = 0; const n = loc.length;
+    for (let i = 0; i < n; i++) { const A = loc[i], B = loc[(i + 1) % n]; ar += A.x * B.y - B.x * A.y; }
+    const sg = ar >= 0 ? 1 : -1;
+    loc.forEach((A, i) => {
+      const B = loc[(i + 1) % n], dx = B.x - A.x, dy = B.y - A.y, ln = Math.hypot(dx, dy) || 1, nx = sg * dy / ln, ny = -sg * dx / ln; if (!vis(nx, ny)) return;
+      const lx = nx * V.c - ny * V.s;
       h += poly([P(A.x, A.y, 0), P(B.x, B.y, 0), P(B.x, B.y, H), P(A.x, A.y, H)], hexMix(sideCol, 0, 0.1 + 0.22 * (lx + 1) / 2), "rgba(0,0,0,.18)", 0.5);
     });
     h += poly(loc.map(p => P(p.x, p.y, H)), topFill, stroke, sw);
@@ -615,17 +690,22 @@ MM.draw3d = function (g, o) {
     if (vis(nx, ny)) return; const A = corners[i], B = corners[(i + 1) % 4];
     h += poly([P(A[0], A[1], 0), P(B[0], B[1], 0), P(B[0], B[1], 16), P(A[0], A[1], 16)], D ? "#26254f" : "#e8e0d2", D ? "#3d3c72" : "#b9ad99", 0.9);
   });
-  if (g.bg) h += `<image href="${g.bg.src}" x="0" y="0" width="${g.bg.w}" height="${g.bg.h}" opacity="0.45" preserveAspectRatio="none" transform="matrix(${V.c} ${V.K * V.s} ${-V.s} ${V.K * V.c} ${-V.c * V.cx + V.s * V.cy} ${V.K * (-V.s * V.cx - V.c * V.cy)})"/>`;
-  for (const s of g.segs) {
+  if (g.bg && !g.plan) h += `<image href="${g.bg.src}" x="0" y="0" width="${g.bg.w}" height="${g.bg.h}" opacity="0.45" preserveAspectRatio="none" transform="matrix(${V.c} ${V.K * V.s} ${-V.s} ${V.K * V.c} ${-V.c * V.cx + V.s * V.cy} ${V.K * (-V.s * V.cx - V.c * V.cy)})"/>`;
+  if (!g.hasArea) for (const s of g.segs) {
     const dx = s.x2 - s.x1, dy = s.y2 - s.y1, len = Math.hypot(dx, dy) || 1, nx = -dy / len * g.cw / 2, ny = dx / len * g.cw / 2;
     h += poly([P(s.x1 + nx, s.y1 + ny, 0.2), P(s.x2 + nx, s.y2 + ny, 0.2), P(s.x2 - nx, s.y2 - ny, 0.2), P(s.x1 - nx, s.y1 - ny, 0.2)], s.kind === "link" ? (D ? "#2a2953" : "#e6d9c6") : (D ? "#302f5c" : "#ece1d0"), D ? "#3b3a6b" : "#d9cbb6", 0.6);
+  }
+  for (const sh of g.shapes || []) {
+    if (sh.k === "area" || sh.k === "praca") h += poly(sh.pts.map(([x, y]) => P(x, y, 0.25)), sh.k === "praca" ? (D ? "#3a3560" : "#efe2c8") : (D ? "#302f5c" : "#ece1d0"), D ? "#3b3a6b" : "#d9cbb6", 0.6);
+    else if (sh.k === "bloco" || (sh.k === "loja" && !sh.st)) h += box(0, 0, 0, 0, 0, sh.k === "bloco" ? 10 : 6, D ? "#2a2850" : "#e9e2d6", D ? "#4a4880" : "#d8d0c2", "rgba(0,0,0,.2)", 0.6, sh.pts).h;
+    if (sh.t && (sh.k === "area" || sh.k === "praca")) { const p = P(sh.cx, sh.cy, 0.5); h += `<text x="${r1(p.x)}" y="${r1(p.y)}" font-size="9" font-weight="900" fill="${D ? "#c9c6ff" : "#2b2860"}" text-anchor="middle" pointer-events="none"${halo}>${esc(sh.t.toUpperCase())}</text>`; }
   }
   for (const L of g.lanes) {
     const s = L.seg, len = Math.hypot(s.x2 - s.x1, s.y2 - s.y1) || 1, ux = (s.x2 - s.x1) / len, uy = (s.y2 - s.y1) / len;
     const lab = (t, anchor) => { const p = P(s.x1 + ux * t, s.y1 + uy * t, 0.4); return `<text x="${r1(p.x)}" y="${r1(p.y + 2.5)}" font-size="7.5" font-weight="800" fill="${D ? "#c9c6ff" : "#2b2860"}" text-anchor="${anchor}" pointer-events="none"${halo}>${esc(L.name)}</text>`; };
     h += lab(10, "start"); if (len > 260) h += lab(len - 10, "end");
   }
-  for (const s of g.segs) {
+  if (!g.hasArea) for (const s of g.segs) {
     if (s.kind === "link") continue;
     const dx = s.x2 - s.x1, dy = s.y2 - s.y1, len = Math.hypot(dx, dy) || 1, nx = -dy / len * g.cw / 2, ny = dx / len * g.cw / 2, ec = D ? "#4b4a86" : "#b7a78d";
     [1, -1].forEach(k => { const a = P(s.x1 + nx * k, s.y1 + ny * k, 0.3), c = P(s.x2 + nx * k, s.y2 + ny * k, 0.3); h += `<line x1="${r1(a.x)}" y1="${r1(a.y)}" x2="${r1(c.x)}" y2="${r1(c.y)}" stroke="${ec}" stroke-width="1" pointer-events="none"/>`; });
@@ -637,7 +717,7 @@ MM.draw3d = function (g, o) {
   for (const s of stores) {
     const on = !o.filter || o.filter(s), sel = o.sel === s.id, col = MM.SEGCOLOR[s.prim] || "#999";
     const H = !on ? 3 : sel ? 26 : s.dest ? 18 : 14, k = Math.min(1, s.bw / 40), wall = D ? "#4a4880" : "#d8d0c2";
-    const bx = box(s.cx, s.cy, s.ang, s.bw, s.bh, H, sel ? (D ? "#5a2a55" : "#ffe4ee") : s.vaga ? (D ? "#5a4a12" : "#ffe69a") : s.dest ? (D ? "#34304f" : "#fffaf0") : (D ? hexMix(col, 22, 0.7) : hexMix(col, 255, 0.78)), sel ? col : wall, sel ? "#cc3366" : s.vaga ? "#c98a00" : s.dest ? "#e2a400" : "rgba(0,0,0,.25)", sel ? 2 : s.dest ? 1.6 : 0.6);
+    const bx = box(s.cx, s.cy, s.ang, s.bw, s.bh, s.poly ? Math.min(H, 8 + (sel ? 10 : 0)) : H, sel ? (D ? "#5a2a55" : "#ffe4ee") : s.vaga ? (D ? "#5a4a12" : "#ffe69a") : s.dest ? (D ? "#34304f" : "#fffaf0") : (D ? hexMix(col, 22, 0.7) : hexMix(col, 255, 0.78)), sel ? col : wall, sel ? "#cc3366" : s.vaga ? "#c98a00" : s.dest ? "#e2a400" : "rgba(0,0,0,.25)", sel ? 2 : s.dest ? 1.6 : 0.6, s.poly);
     tops[s.id] = bx.top;
     h += `<g data-id="${s.id}" opacity="${on ? 1 : 0.35}" style="cursor:pointer">${bx.h}`;
     if (on) {
@@ -675,7 +755,7 @@ MM.panZoom = function (svg, wrap, cb) {
     if (ptrs.size === 1) {
       const hd = cb.handle && e.target.closest("[data-h]");
       ge = { mode: hd ? "hold" : "tap", h: hd ? hd.getAttribute("data-h") : null, sx: e.clientX, sy: e.clientY, vb: Object.assign({}, vb), target: e.target };
-      if (hd) cb.handle(ge.h, world(e.clientX, e.clientY), "start");
+      if (hd && cb.handle(ge.h, world(e.clientX, e.clientY), "start") === false) ge.mode = "tap";
     } else if (ptrs.size === 2) {
       const [a, b] = [...ptrs.values()];
       ge = { mode: "pinch", d: Math.hypot(a.x - b.x, a.y - b.y), vb: Object.assign({}, vb), mid: world((a.x + b.x) / 2, (a.y + b.y) / 2) };

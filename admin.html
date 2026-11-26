@@ -42,6 +42,10 @@ textarea{min-height:76px;resize:vertical}
 .zb{position:absolute;right:8px;top:8px;display:flex;flex-direction:column;gap:4px}.zb button{width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.92);font-size:20px;font-weight:800;color:var(--ink)}
 .btn:disabled{opacity:.4;cursor:default}.btn.chipm.on{background:#ffe9d6;border-color:#e65100}
 #ed .hd{stroke-width:3px}
+#edwrap.t-poly,#edwrap.t-rect,#edwrap.t-door{cursor:crosshair}
+.chipu{display:inline-block;margin:2px 4px 2px 0;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:13px}
+.chipu.on{background:#ffe9d6;border-color:#e65100}
+#dfin{margin-left:8px}
 .qrs{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
 .qr{background:#fff;border:1px solid #222;border-radius:10px;padding:10px;text-align:center;break-inside:avoid}
 .qr svg,.qr img{width:100%;height:auto;max-width:170px}
@@ -97,12 +101,21 @@ textarea{min-height:76px;resize:vertical}
   <section class="hide" id="v-planta">
     <div class="box">
       <h2>Planta do piso</h2>
-      <details class="mut noprint" style="margin:4px 0 8px"><summary style="cursor:pointer;font-weight:800;color:var(--ink)">Como editar (3 passos)</summary>
-        <ol style="margin:6px 0 0;padding-left:20px"><li>Envie a foto/planta oficial do piso como <b>imagem de fundo</b> (opcional).</li><li>Com a ferramenta <b>☝ Mover</b>, arraste cada corredor <b>pelo meio</b> (move) ou <b>pelas bolinhas das pontas</b> (estica/gira) para cima do desenho. As lojas se distribuem sozinhas ao longo dele, pela ordem dos números.</li><li>Use <b>╱ Ligação</b> para desenhar passarelas/escadas que conectam corredores e <b>📍 Marco</b> para banheiro, escada, elevador, caixa, estacionamento. Depois <b>Salvar planta</b>.</li></ol></details>
+      <details class="mut noprint" style="margin:4px 0 8px"><summary style="cursor:pointer;font-weight:800;color:var(--ink)">Como montar a planta real (passo a passo)</summary>
+        <ol style="margin:6px 0 0;padding-left:20px">
+          <li>Envie a imagem da planta do piso em <b>🖼 Imagem de fundo</b> (de preferência a planta oficial, com lojas em branco e corredores coloridos).</li>
+          <li>Toque em <b>✨ Detectar formas na imagem</b>: o sistema desenha sozinho as lojas, a área dos corredores e a rede de caminhos usada nas rotas.</li>
+          <li>Toque em cada forma e escolha qual loja ela é (ou toque no nome na lista <b>“Lojas ainda sem forma”</b>). Use <b>🚪 Marcar porta</b> se a entrada da loja não for no corredor mais perto.</li>
+          <li>Ajuste o que precisar: <b>⬠ Desenhar forma</b> / <b>▭ Retângulo</b> para criar, bolinhas laranja para mexer nos cantos, brancas para criar canto, <b>╱ Ligação</b> para caminhos e <b>📍 Marco</b> para banheiro, escada etc.</li>
+          <li>Arraste a <b>Entrada</b> para o lugar certo e toque em <b>Salvar planta</b>.</li>
+        </ol></details>
       <div class="row" style="margin-top:0"><select id="pg" style="flex:1;min-width:180px"></select>
-        <label class="btn" style="margin:0;color:var(--ink)">🖼 Imagem de fundo<input type="file" id="bgf" accept="image/*" class="hide"></label><button class="btn" id="rmbg">Remover imagem</button></div>
+        <label class="btn" style="margin:0;color:var(--ink)">🖼 Imagem de fundo<input type="file" id="bgf" accept="image/*" class="hide"></label><button class="btn" id="rmbg">Remover imagem</button><button class="btn p" id="detect" title="Lê a imagem de fundo e cria as formas das lojas e corredores">✨ Detectar formas na imagem</button></div>
       <div class="row tb" id="tb">
         <button class="btn tool p" data-tool="move">☝ Mover</button>
+        <button class="btn tool" data-tool="poly">⬠ Desenhar forma</button>
+        <button class="btn tool" data-tool="rect">▭ Retângulo</button>
+        <select id="sk" style="width:auto" title="Tipo da forma"><option value="loja">Loja</option><option value="area">Corredor / área comum</option><option value="praca">Praça / alimentação</option><option value="bloco">Bloco (sem loja, pilar, vazio)</option></select>
         <button class="btn tool" data-tool="link">╱ Ligação</button>
         <button class="btn tool" data-tool="marco">📍 Marco</button><select id="mt" style="width:auto"></select>
         <span style="flex:1"></span>
@@ -113,6 +126,9 @@ textarea{min-height:76px;resize:vertical}
       <div id="edwrap" style="margin-top:6px"><svg id="ed" xmlns="http://www.w3.org/2000/svg"></svg>
         <div class="zb"><button id="ezi" aria-label="Aproximar">+</button><button id="ezo" aria-label="Afastar">−</button><button id="pfit" aria-label="Ver tudo">⤢</button></div></div>
       <div id="segp" class="mut" style="margin-top:8px"></div>
+      <h3 style="margin:14px 0 6px">Lojas deste piso ainda sem forma <span class="mut" id="unln"></span></h3>
+      <div class="mut" style="margin-bottom:6px">Toque numa forma no mapa e depois no nome abaixo para vinculá-la. Sem forma selecionada, o nome escolhido vai para a próxima forma que você desenhar.</div>
+      <div id="unl" style="max-height:150px;overflow:auto"></div>
       <h3 style="margin:14px 0 6px">Marcos neste piso <span class="mut">(toque para selecionar, arraste no mapa para mover)</span></h3>
       <div id="mlist" style="margin-top:6px"></div>
       <div class="row">
@@ -364,7 +380,7 @@ async function loadStats() {
 }
 
 /* ---------- editor de planta ---------- */
-const ed = { key: null, lay: null, g: null, sel: null, drag: null, tool: "move", hist: [], fut: [], dirty: false, start: null, pre: null, pushed: false };
+const ed = { key: null, lay: null, g: null, sel: null, drag: null, tool: "move", hist: [], fut: [], dirty: false, start: null, pre: null, pushed: false, draft: [], vsel: null, assign: null };
 let pz = null;
 function fillGroups(sel) { sel.innerHTML = MM.groupOrder(built.G).map(k => `<option value="${k}">${gname(k)}</option>`).join(""); }
 function openPlanta() {
@@ -391,34 +407,55 @@ window.addEventListener("beforeunload", e => { if (ed.dirty) { e.preventDefault(
 const HINTS = {
   move: "☝ <b>Mover:</b> arraste um corredor <b>pelo meio</b> para deslocá-lo, ou pelas <b>bolinhas das pontas</b> para esticar/girar. Arraste um <b>marco</b> (ícone) para reposicioná-lo. Toque num item para ver as opções. Pinça ou roda do mouse = zoom.",
   link: "╱ <b>Ligação:</b> toque no mapa onde ela <b>começa</b> e depois onde <b>termina</b> (as pontas grudam nos corredores próximos).",
+  poly: "⬠ <b>Desenhar forma:</b> toque em cada canto da loja/área, em volta. Para fechar, toque no <b>primeiro ponto</b> (branco) ou em <b>Concluir</b>. Com o Ímã ligado, os cantos grudam nos das formas vizinhas e ficam retos.",
+  rect: "▭ <b>Retângulo:</b> toque num canto e depois no canto oposto.",
+  door: "🚪 <b>Porta:</b> toque no corredor onde fica a entrada desta loja.",
   marco: "📍 <b>Marco:</b> escolha o tipo ao lado e toque no mapa onde fica. Pode tocar várias vezes; volte para ☝ Mover quando terminar."
 };
 function setTool(t) {
-  ed.tool = t; ed.start = null;
+  ed.tool = t; ed.start = null; ed.draft = [];
   document.querySelectorAll("#tb .tool").forEach(b => b.classList.toggle("p", b.dataset.tool === t));
   $("edwrap").className = "t-" + t; $("mhint").innerHTML = HINTS[t]; if (ed.g) preview();
+  if (t === "poly" || t === "rect") $("sk").style.outline = "2px solid #e65100"; else $("sk").style.outline = "";
 }
 $("tb").onclick = e => { const b = e.target.closest(".tool"); if (b) setTool(b.dataset.tool === ed.tool && ed.tool !== "move" ? "move" : b.dataset.tool); };
 $("mt").onchange = () => setTool("marco");
+$("sk").onchange = () => { if (ed.tool !== "poly" && ed.tool !== "rect") setTool("poly"); };
 function fixHandles(vb) {
   vb = vb || pz.vb(); const k = vb.w / ($("edwrap").clientWidth || 360);
-  document.querySelectorAll("#ed .hd").forEach(c => c.setAttribute("r", Math.max(7, 12 * k).toFixed(1)));
+  document.querySelectorAll("#ed .hd").forEach(c => c.setAttribute("r", Math.max(4, (c.classList.contains("hm") ? 6 : c.classList.contains("hv") ? 8.5 : 12) * k).toFixed(1)));
 }
 function preview() {
   const b = MM.build(RAW, Object.assign({}, LAY, { [ed.key]: ed.lay })); ed.g = b.G[ed.key];
-  $("ed").innerHTML = MM.draw(ed.g, { edit: true, selSeg: ed.sel, qr: MM.qrPoints(ed.g) });
+  $("ed").innerHTML = MM.draw(ed.g, { edit: true, selSeg: ed.sel, qr: MM.qrPoints(ed.g), draft: ed.draft });
+  unassigned();
   if (ed.start) $("ed").insertAdjacentHTML("beforeend", `<circle class="hd" cx="${ed.start.x}" cy="${ed.start.y}" r="8" fill="#e65100" stroke="#fff" stroke-width="3" pointer-events="none"/>`);
   fixHandles();
 }
 const marcoOf = id => ((LAY.marcos || {})[ed.key] || []).find(m => "M:" + m.id === id);
-const refOf = id => id.startsWith("L:") ? ed.lay.lanes[id.slice(2)] : id.startsWith("M:") ? marcoOf(id) : ed.lay.links.find(k => "K:" + k.id === id);
+const shapeOf = id => (ed.lay.shapes || []).find(x => "S:" + x.id === id);
+const refOf = id => id.startsWith("S:") ? shapeOf(id) : id.startsWith("L:") ? ed.lay.lanes[id.slice(2)] : id.startsWith("M:") ? marcoOf(id) : ed.lay.links.find(k => "K:" + k.id === id);
 const rr = n => Math.round(n * 10) / 10;
 const snapOn = () => $("snap").checked;
 function snapPt(p, id) { const near = MM.nearest(ed.g, p, id); return snapOn() && near && near.d < 14 ? { x: rr(near.x), y: rr(near.y) } : { x: rr(p.x), y: rr(p.y) }; }
 function edHandle(h, p, phase) {
+  if (phase === "start" && ed.tool !== "move") return false;   /* ferramentas de desenho: toque vale como ponto, arrastar move o mapa */
   if (phase === "start") { ed.pre = JSON.stringify(ed.lay); ed.pushed = false; }
   else if (!ed.pushed) { ed.pushed = true; pushHist(ed.pre); }
   if (h === "entry") { if (phase !== "start") { ed.lay.entry = { x: rr(p.x), y: rr(p.y) }; preview(); } return; }
+  if (h.startsWith("S:")) {
+    const [sid, k] = h.split("|"), sh = shapeOf(sid); if (!sh) return;
+    if (phase === "start") {
+      if (ed.tool !== "move") return false;        /* nas ferramentas de desenho, arrastar move o mapa */
+      ed.sel = sid; ed.drag = { p0: p, pts: sh.pts.map(q => q.slice()) };
+      if (k[0] === "v") ed.vsel = +k.slice(1);
+      return;
+    }
+    if (k === "m") { const dx = p.x - ed.drag.p0.x, dy = p.y - ed.drag.p0.y; sh.pts = ed.drag.pts.map(([x, y]) => [rr(x + dx), rr(y + dy)]); if (sh.d && !ed.drag.d0) ed.drag.d0 = sh.d.slice(); if (sh.d) sh.d = [rr(ed.drag.d0[0] + dx), rr(ed.drag.d0[1] + dy)]; }
+    else if (k[0] === "a") { const i = +k.slice(1); if (!ed.drag.ins) { sh.pts.splice(i + 1, 0, [rr(p.x), rr(p.y)]); ed.drag.ins = true; } const q = snapV(p, sh, i + 1); sh.pts[i + 1] = [q.x, q.y]; ed.vsel = i + 1; }
+    else if (k[0] === "v") { const i = +k.slice(1), q = snapV(p, sh, i); sh.pts[i] = [q.x, q.y]; }
+    preview(); if (phase === "end") segPanel(); return;
+  }
   const [id, k] = h.split("|"), ref = refOf(id); if (!ref) return;
   if (id.startsWith("M:")) {
     if (phase === "start") { ed.sel = id; return preview(); }
@@ -439,7 +476,48 @@ function edHandle(h, p, phase) {
   }
   ed.sel = id; preview(); if (phase === "end") segPanel();
 }
+/* ímã dos vértices: gruda em cantos de outras formas e alinha com o canto anterior/seguinte */
+function snapV(p, sh, idx) {
+  const k = pz.vb().w / ($("edwrap").clientWidth || 360), thr = 11 * k; let x = p.x, y = p.y;
+  if (!snapOn()) return { x: rr(x), y: rr(y) };
+  let best = null, bd = thr;
+  for (const o of ed.lay.shapes || []) o.pts.forEach(([px, py], i) => { if (o === sh && i === idx) return; const d = Math.hypot(px - x, py - y); if (d < bd) { bd = d; best = [px, py]; } });
+  if (best) return { x: best[0], y: best[1] };
+  const nb = [];
+  if (sh) { const n = sh.pts.length; nb.push(sh.pts[(idx - 1 + n) % n], sh.pts[(idx + 1) % n]); }
+  else if (ed.draft.length) nb.push(ed.draft[ed.draft.length - 1], ed.draft[0]);
+  for (const q of nb) { if (!q) continue; if (Math.abs(q[0] - x) < thr * 0.7) x = q[0]; if (Math.abs(q[1] - y) < thr * 0.7) y = q[1]; }
+  return { x: rr(x), y: rr(y) };
+}
+function finishShape(pts) {
+  if (pts.length < 3) return;
+  snap(); ed.lay.shapes = ed.lay.shapes || [];
+  const sh = { id: "s" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), k: $("sk").value, pts };
+  if (sh.k === "loja" && ed.assign) { sh.s = ed.assign; ed.assign = null; }
+  ed.lay.shapes.push(sh); ed.sel = "S:" + sh.id; ed.draft = []; ed.start = null; ed.vsel = null;
+  $("mhint").innerHTML = "✓ Forma criada. " + (sh.k === "loja" && !sh.s ? "Escolha abaixo qual loja é esta, ou continue desenhando." : "Continue desenhando ou volte para ☝ Mover.");
+  preview(); segPanel();
+}
 function edTap(target, p, h) {
+  if (ed.tool === "poly") {
+    const k = pz.vb().w / ($("edwrap").clientWidth || 360);
+    if (ed.draft.length >= 3 && Math.hypot(p.x - ed.draft[0][0], p.y - ed.draft[0][1]) < 14 * k) return finishShape(ed.draft.slice());
+    const q = snapV(p, null, -1); ed.draft.push([q.x, q.y]);
+    $("mhint").innerHTML = `⬠ ${ed.draft.length} ponto(s). ${ed.draft.length >= 3 ? 'Toque no primeiro ponto ou <button class="btn p" id="dfin">Concluir forma</button>' : "Continue tocando nos cantos."} <button class="btn" id="dund">Desfazer ponto</button>`;
+    if ($("dfin")) $("dfin").onclick = () => finishShape(ed.draft.slice());
+    $("dund").onclick = () => { ed.draft.pop(); preview(); };
+    return preview();
+  }
+  if (ed.tool === "rect") {
+    const q = snapV(p, null, -1);
+    if (!ed.draft.length) { ed.draft = [[q.x, q.y]]; $("mhint").innerHTML = "▭ Agora toque no canto oposto."; return preview(); }
+    const [a, b] = ed.draft[0]; if (Math.abs(q.x - a) < 3 || Math.abs(q.y - b) < 3) return;
+    return finishShape([[a, b], [q.x, b], [q.x, q.y], [a, q.y]]);
+  }
+  if (ed.tool === "door") {
+    const sh = shapeOf(ed.sel || ""); if (sh) { snap(); const q = snapPt(p); sh.d = [q.x, q.y]; }
+    setTool("move"); preview(); segPanel(); return;
+  }
   if (ed.tool === "marco") return addMarco($("mt").value, snapPt(p));
   if (ed.tool === "link") {
     const q = snapPt(p);
@@ -448,7 +526,9 @@ function edTap(target, p, h) {
     snap(); const id = "n" + Date.now().toString(36);
     ed.lay.links.push({ id, name: "ligação", x1: ed.start.x, y1: ed.start.y, x2: q.x, y2: q.y }); ed.sel = "K:" + id; setTool("move"); preview(); segPanel(); return;
   }
-  ed.sel = h && h !== "entry" ? h.split("|")[0] : null; preview(); segPanel();
+  ed.sel = h && h !== "entry" ? h.split("|")[0] : null;
+  ed.vsel = h && /\|v\d+$/.test(h) ? +h.split("|v")[1] : null;
+  preview(); segPanel();
 }
 /* marcos: salvos na hora, em layout['marcos'] */
 $("mt").innerHTML = Object.entries(MM.MT).map(([k, v]) => `<option value="${k}">${v[0]} ${v[1]}</option>`).join("");
@@ -469,9 +549,50 @@ $("mlist").onclick = e => {
   const s = e.target.closest("[data-msel]"); if (s) { ed.sel = "M:" + s.dataset.msel; const m = marcoOf(ed.sel); preview(); marcoList(); segPanel(); if (m) pz.center(m.x, m.y); }
 };
 function delMarco(id) { const all = Object.assign({}, LAY.marcos || {}); all[ed.key] = (all[ed.key] || []).filter(m => m.id !== id); if (ed.sel === "M:" + id) ed.sel = null; saveMarcos(all); }
+const KN = { loja: "Loja", area: "Corredor / área comum", praca: "Praça / alimentação", bloco: "Bloco (sem loja)" };
+function storesHere() { return (built.G[ed.key] || { stores: [] }).stores; }
+function shapePanel(sh) {
+  const el = $("segp"), st = sh.s ? storesHere().find(x => x.s === sh.s) : null, inf = MM.polyInfo(sh.pts);
+  el.innerHTML = `<b style="color:var(--ink)">${KN[sh.k] || "Forma"}${st ? " · " + esc(st.n) : sh.t ? " · " + esc(sh.t) : ""}</b> — ${sh.pts.length} cantos · ~${Math.round(inf.w * ed.lay.mpu)}×${Math.round(inf.h * ed.lay.mpu)} m.
+    Arraste <b>pelo meio</b> para mover, as <b>bolinhas laranja</b> para mexer nos cantos, e as <b>brancas</b> para criar um canto novo.${ed.vsel != null ? ` Canto ${ed.vsel + 1} selecionado.` : ""}
+    <div class="row"><select id="shk" style="width:auto">${Object.entries(KN).map(([k, v]) => `<option value="${k}" ${k === sh.k ? "selected" : ""}>${v}</option>`).join("")}</select>
+      ${sh.k === "loja" ? `<input type="search" id="shq" placeholder="Buscar loja para vincular…" style="flex:1;min-width:160px"><select id="shs" style="flex:1;min-width:180px"><option value="">— sem loja —</option>${storesHere().slice().sort((a, b) => a.n.localeCompare(b.n)).map(x => `<option value="${esc(x.s)}" ${x.s === sh.s ? "selected" : ""}>${esc(x.n)}${x.num ? " · " + esc(x.num) : ""}</option>`).join("")}</select>`
+        : `<input type="text" id="sht" value="${esc(sh.t || "")}" placeholder="Rótulo (ex.: Praça de Alimentação)" style="flex:1;min-width:160px">`}</div>
+    <div class="row">${sh.k === "loja" ? `<button class="btn" id="shdoor">🚪 Marcar porta</button>${sh.d ? '<button class="btn" id="shdauto">Porta automática</button>' : ""}` : ""}
+      <button class="btn" id="shdup">⧉ Duplicar</button>${ed.vsel != null && sh.pts.length > 3 ? '<button class="btn" id="shvdel">Remover canto</button>' : ""}<button class="btn d" id="shdel">Excluir forma</button></div>`;
+  $("shk").onchange = () => { snap(); sh.k = $("shk").value; if (sh.k !== "loja") delete sh.s; preview(); segPanel(); };
+  if ($("shs")) {
+    $("shs").onchange = () => { snap(); const v = $("shs").value; for (const o of ed.lay.shapes) if (o !== sh && o.s === v && v) delete o.s; if (v) sh.s = v; else delete sh.s; preview(); segPanel(); };
+    $("shq").oninput = () => { const q = MM.norm($("shq").value); [...$("shs").options].forEach(o => { o.hidden = !!q && o.value && !MM.norm(o.textContent).includes(q); });
+      const first = [...$("shs").options].find(o => o.value && !o.hidden); if (first && q) $("shs").value = first.value; };
+    $("shq").onkeydown = e => { if (e.key === "Enter") $("shs").onchange(); };
+  }
+  if ($("sht")) $("sht").onchange = () => { snap(); const v = $("sht").value.trim(); if (v) sh.t = v; else delete sh.t; preview(); };
+  if ($("shdoor")) $("shdoor").onclick = () => setTool("door");
+  if ($("shdauto")) $("shdauto").onclick = () => { snap(); delete sh.d; preview(); segPanel(); };
+  $("shdup").onclick = () => { snap(); const n = { id: "s" + Date.now().toString(36), k: sh.k, pts: sh.pts.map(([x, y]) => [x + 12, y + 12]) }; if (sh.t) n.t = sh.t; ed.lay.shapes.push(n); ed.sel = "S:" + n.id; preview(); segPanel(); };
+  if ($("shvdel")) $("shvdel").onclick = () => delVertex(sh);
+  $("shdel").onclick = () => delShape(sh);
+}
+function delShape(sh) { snap(); ed.lay.shapes = ed.lay.shapes.filter(x => x !== sh); ed.sel = null; ed.vsel = null; preview(); segPanel(); }
+function delVertex(sh) { if (ed.vsel == null || sh.pts.length <= 3) return; snap(); sh.pts.splice(ed.vsel, 1); ed.vsel = null; preview(); segPanel(); }
+function unassigned() {
+  const used = new Set((ed.lay.shapes || []).filter(x => x.s).map(x => x.s)), l = storesHere().filter(x => !used.has(x.s)).sort((a, b) => a.n.localeCompare(b.n));
+  const sh = shapeOf(ed.sel || ""), canAssign = sh && sh.k === "loja";
+  $("unln").textContent = `(${l.length} de ${storesHere().length})`;
+  $("unl").innerHTML = l.map(x => `<span class="chipu ${ed.assign === x.s ? "on" : ""}" data-us="${esc(x.s)}">${esc(x.n)}${x.num ? " · " + esc(x.num) : ""}</span>`).join("") || '<span class="mut">Todas as lojas deste piso já têm forma. 🎉</span>';
+  $("unl").title = canAssign ? "Toque para vincular à forma selecionada" : "Toque para desenhar a forma desta loja";
+}
+$("unl").onclick = e => {
+  const c = e.target.closest("[data-us]"); if (!c) return; const slug = c.dataset.us, sh = shapeOf(ed.sel || "");
+  if (sh && sh.k === "loja" && !sh.s) { snap(); sh.s = slug; preview(); segPanel(); return; }
+  ed.assign = ed.assign === slug ? null : slug; $("sk").value = "loja"; if (ed.tool !== "poly" && ed.tool !== "rect") setTool("poly");
+  $("mhint").innerHTML = `⬠ Desenhe a forma de <b>${esc(c.textContent)}</b>: toque nos cantos.`; unassigned();
+};
 function segPanel() {
   const el = $("segp");
-  if (!ed.sel) { el.innerHTML = "Nada selecionado. Toque num corredor, ligação ou marco para ver as opções."; return; }
+  if (!ed.sel) { el.innerHTML = "Nada selecionado. Toque numa forma, corredor, ligação ou marco para ver as opções."; return; }
+  if (ed.sel.startsWith("S:")) { const sh = shapeOf(ed.sel); if (sh) shapePanel(sh); else el.innerHTML = ""; return; }
   if (ed.sel.startsWith("M:")) {
     const m = marcoOf(ed.sel); if (!m) { el.innerHTML = ""; return; }
     el.innerHTML = `<b style="color:var(--ink)">${MM.MT[m.t] ? MM.MT[m.t][0] + " " + MM.MT[m.t][1] : esc(m.t)}</b> — arraste no mapa para mover.
@@ -497,10 +618,13 @@ document.addEventListener("keydown", e => {
   const k = e.key.toLowerCase();
   if ((e.ctrlKey || e.metaKey) && k === "z") { e.preventDefault(); return e.shiftKey ? redo() : undo(); }
   if ((e.ctrlKey || e.metaKey) && k === "y") { e.preventDefault(); return redo(); }
-  if (k === "escape") { setTool("move"); ed.sel = null; preview(); segPanel(); return; }
+  if (k === "escape") { setTool("move"); ed.sel = null; ed.vsel = null; ed.assign = null; preview(); segPanel(); return; }
+  if (k === "enter" && ed.tool === "poly" && ed.draft.length >= 3) { finishShape(ed.draft.slice()); return; }
   if (!ed.sel) return;
-  if (k === "delete" || k === "backspace") { e.preventDefault(); if (ed.sel.startsWith("M:")) delMarco(ed.sel.slice(2)); else if (ed.sel.startsWith("K:")) { snap(); ed.lay.links = ed.lay.links.filter(x => "K:" + x.id !== ed.sel); ed.sel = null; preview(); segPanel(); } return; }
+  if (k === "delete" || k === "backspace") { e.preventDefault(); if (ed.sel.startsWith("S:")) { const sh = shapeOf(ed.sel); if (sh) { if (ed.vsel != null && sh.pts.length > 3) delVertex(sh); else delShape(sh); } return; } if (ed.sel.startsWith("M:")) delMarco(ed.sel.slice(2)); else if (ed.sel.startsWith("K:")) { snap(); ed.lay.links = ed.lay.links.filter(x => "K:" + x.id !== ed.sel); ed.sel = null; preview(); segPanel(); } return; }
   const d = { arrowleft: [-1, 0], arrowright: [1, 0], arrowup: [0, -1], arrowdown: [0, 1] }[k]; if (!d || ed.sel.startsWith("M:")) return;
+  if (ed.sel.startsWith("S:")) { const sh = shapeOf(ed.sel); if (!sh) return; e.preventDefault(); snap(); const st = e.shiftKey ? 5 : 1;
+    if (ed.vsel != null) { const q = sh.pts[ed.vsel]; sh.pts[ed.vsel] = [rr(q[0] + d[0] * st), rr(q[1] + d[1] * st)]; } else sh.pts = sh.pts.map(([x, y]) => [rr(x + d[0] * st), rr(y + d[1] * st)]); preview(); return; }
   e.preventDefault(); const r = refOf(ed.sel), st = e.shiftKey ? 5 : 1; if (!r) return; snap();
   r.x1 = rr(r.x1 + d[0] * st); r.x2 = rr(r.x2 + d[0] * st); r.y1 = rr(r.y1 + d[1] * st); r.y2 = rr(r.y2 + d[1] * st); preview();
 });
@@ -514,10 +638,151 @@ $("bgf").onchange = e => {
   const f = e.target.files[0]; if (!f) return; const fr = new FileReader();
   fr.onload = () => { const im = new Image(); im.onload = () => {
     const w = Math.min(1600, im.width), h = Math.round(im.height * w / im.width), c = document.createElement("canvas"); c.width = w; c.height = h; c.getContext("2d").drawImage(im, 0, 0, w, h);
-    snap(); ed.lay.bg = { src: c.toDataURL("image/jpeg", 0.72), w: 1200, h: Math.round(1200 * h / w) }; preview(); pz.fit(MM.bounds(ed.g), Infinity);
+    snap(); ed.bgOrig = fr.result; ed.lay.bg = { src: c.toDataURL("image/jpeg", 0.72), w: 1200, h: Math.round(1200 * h / w) }; preview(); pz.fit(MM.bounds(ed.g), Infinity);
     msg($("pmsg"), "Imagem carregada. Arraste os corredores para cima dela e salve.", true);
   }; im.src = fr.result; }; fr.readAsDataURL(f); e.target.value = "";
 };
+/* ✨ detecção: separa na imagem as regiões brancas (lojas) e a cor dos corredores; vira polígonos simplificados */
+function traceContour(lab, W, H, id, sx, sy) {
+  const D = [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]], at = (x, y) => x >= 0 && y >= 0 && x < W && y < H && lab[y * W + x] === id;
+  const out = []; let x = sx, y = sy, dir = 7, n = 0; const max = W * H;
+  do { out.push([x, y]); let found = false;
+    for (let i = 0; i < 8; i++) { const d = (dir + 6 + i) % 8, nx = x + D[d][0], ny = y + D[d][1]; if (at(nx, ny)) { x = nx; y = ny; dir = d; found = true; break; } }
+    if (!found) break; } while ((x !== sx || y !== sy) && ++n < max);
+  return out;
+}
+function simplify(pts, eps) {
+  if (pts.length < 4) return pts;
+  const dist = (p, a, b) => { const dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1; return Math.abs(dy * p[0] - dx * p[1] + b[0] * a[1] - b[1] * a[0]) / l; };
+  const rdp = (a, b) => { let m = 0, k = -1; for (let i = a + 1; i < b; i++) { const d = dist(pts[i], pts[a], pts[b]); if (d > m) { m = d; k = i; } } return m > eps ? rdp(a, k).slice(0, -1).concat(rdp(k, b)) : [pts[a], pts[b]]; };
+  /* fecha: divide no ponto mais distante do primeiro */
+  let far = 0, fi = 0; pts.forEach((p, i) => { const d = Math.hypot(p[0] - pts[0][0], p[1] - pts[0][1]); if (d > far) { far = d; fi = i; } });
+  const r = rdp(0, fi).slice(0, -1).concat(rdp(fi, pts.length - 1).slice(0, -1));
+  /* endireita: ângulos quase retos viram retos */
+  return r;
+}
+function squareUp(pts, tol) { const out = pts.map(p => p.slice()), n = out.length;
+  for (let i = 0; i < n; i++) { const a = out[i], b = out[(i + 1) % n]; if (Math.abs(a[0] - b[0]) < tol) { const x = (a[0] + b[0]) / 2; a[0] = b[0] = x; } else if (Math.abs(a[1] - b[1]) < tol) { const y = (a[1] + b[1]) / 2; a[1] = b[1] = y; } }
+  return out; }
+/* erosão (dil=false) ou dilatação (dil=true) com janela quadrada, separável */
+function morph(A, W, H, rad, dil) {
+  const T = new Uint8Array(A.length), O = new Uint8Array(A.length);
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { let v = dil ? 0 : 1; for (let k = -rad; k <= rad; k++) { const xx = x + k; const a = xx < 0 || xx >= W ? (dil ? 0 : 0) : A[y * W + xx]; if (dil ? a : !a) { v = dil ? 1 : 0; break; } } T[y * W + x] = v; }
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { let v = dil ? 0 : 1; for (let k = -rad; k <= rad; k++) { const yy = y + k; const a = yy < 0 || yy >= H ? 0 : T[yy * W + x]; if (dil ? a : !a) { v = dil ? 1 : 0; break; } } O[y * W + x] = v; }
+  return O;
+}
+/* preenche buracos pequenos dentro do corredor (ícones, textos) que não são lojas */
+function fillHoles(M, cls, W, H) {
+  const N = W * H, seen = new Uint8Array(N);
+  for (let i = 0; i < N; i++) { if (M[i] || seen[i]) continue; const st = [i], comp = []; seen[i] = 1; let border = false, store = false;
+    while (st.length) { const j = st.pop(); comp.push(j); const x = j % W, y = (j / W) | 0; if (x === 0 || y === 0 || x === W - 1 || y === H - 1) border = true; if (cls[j] === 1) store = true;
+      for (const k of [x > 0 ? j - 1 : -1, x < W - 1 ? j + 1 : -1, y > 0 ? j - W : -1, y < H - 1 ? j + W : -1]) if (k >= 0 && !M[k] && !seen[k]) { seen[k] = 1; st.push(k); } }
+    if (!border && !store && comp.length < 4000) comp.forEach(j => M[j] = 1); }
+}
+/* Zhang-Suen → grafo de pixels → trechos retos (x1,y1,x2,y2) em pixels */
+function skeletonLinks(M, W, H, f) {
+  f = f || 1;
+  const S = M.slice(), at = (x, y) => x >= 0 && y >= 0 && x < W && y < H ? S[y * W + x] : 0;
+  let ch = true, it = 0;
+  while (ch && it++ < 200) { ch = false;
+    for (const step of [0, 1]) { const del = [];
+      for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) { const i = y * W + x; if (!S[i]) continue;
+        const p = [at(x, y - 1), at(x + 1, y - 1), at(x + 1, y), at(x + 1, y + 1), at(x, y + 1), at(x - 1, y + 1), at(x - 1, y), at(x - 1, y - 1)];
+        const B = p.reduce((a, v) => a + v, 0); if (B < 2 || B > 6) continue;
+        let A = 0; for (let k = 0; k < 8; k++) if (!p[k] && p[(k + 1) % 8]) A++; if (A !== 1) continue;
+        if (step === 0 ? (p[0] * p[2] * p[4] || p[2] * p[4] * p[6]) : (p[0] * p[2] * p[6] || p[0] * p[4] * p[6])) continue;
+        del.push(i); }
+      if (del.length) { ch = true; del.forEach(i => S[i] = 0); } } }
+  const NB = [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]];
+  const deg = (x, y) => NB.reduce((a, [dx, dy]) => a + at(x + dx, y + dy), 0);
+  const isNode = (x, y) => deg(x, y) !== 2, used = new Set(), out = [];
+  const rdpO = (pts, eps) => { if (pts.length < 3) return pts; const a = pts[0], b = pts[pts.length - 1], dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1; let m = 0, k = 0;
+    for (let i = 1; i < pts.length - 1; i++) { const d = Math.abs(dy * pts[i][0] - dx * pts[i][1] + b[0] * a[1] - b[1] * a[0]) / l; if (d > m) { m = d; k = i; } }
+    return m > eps ? rdpO(pts.slice(0, k + 1), eps).slice(0, -1).concat(rdpO(pts.slice(k), eps)) : [a, b]; };
+  for (let y = 1; y < H - 1; y++) for (let x = 1; x < W - 1; x++) { if (!S[y * W + x] || !isNode(x, y)) continue;
+    for (const [dx, dy] of NB) { let px = x, py = y, nx = x + dx, ny = y + dy; if (!at(nx, ny)) continue;
+      const ek = Math.min(y * W + x, ny * W + nx) + ":" + Math.max(y * W + x, ny * W + nx); if (used.has(ek)) continue;
+      const path = [[x, y]]; let guard = 0;
+      while (guard++ < W * H) { used.add(Math.min(py * W + px, ny * W + nx) + ":" + Math.max(py * W + px, ny * W + nx)); path.push([nx, ny]);
+        if (isNode(nx, ny)) break;
+        let nxt = null; for (const [ex, ey] of [[1, 0], [0, 1], [-1, 0], [0, -1], [1, 1], [-1, 1], [-1, -1], [1, -1]]) { const qx = nx + ex, qy = ny + ey; if ((qx !== px || qy !== py) && at(qx, qy) && !path.some(p => p[0] === qx && p[1] === qy)) { nxt = [qx, qy]; break; } }
+        if (!nxt) break; px = nx; py = ny; [nx, ny] = nxt; }
+      const end = path[path.length - 1], spur = deg(x, y) === 1 || deg(end[0], end[1]) === 1;
+      let len = 0; for (let i = 1; i < path.length; i++) len += Math.hypot(path[i][0] - path[i - 1][0], path[i][1] - path[i - 1][1]);
+      if (len < 3 * f || (spur && len < 26 * f)) continue;
+      const sp = rdpO(path, 2.6 * f); for (let i = 1; i < sp.length; i++) out.push([sp[i - 1][0], sp[i - 1][1], sp[i][0], sp[i][1]]); } }
+  return out;
+}
+/* junta pedaços soltos da rede: liga a ponta mais perto de cada pedaço ao maior, se a reta passar só por corredor */
+function bridge(L, M, W, H, f) {
+  const pd = (px, py, s) => { const dx = s[2] - s[0], dy = s[3] - s[1], l2 = dx * dx + dy * dy || 1; const t = Math.max(0, Math.min(1, ((px - s[0]) * dx + (py - s[1]) * dy) / l2)); const x = s[0] + t * dx, y = s[1] + t * dy; return [Math.hypot(px - x, py - y), x, y]; };
+  const clear = (x1, y1, x2, y2) => { const n = Math.ceil(Math.hypot(x2 - x1, y2 - y1)); for (let i = 0; i <= n; i++) { const x = Math.round(x1 + (x2 - x1) * i / (n || 1)), y = Math.round(y1 + (y2 - y1) * i / (n || 1)); if (x < 0 || y < 0 || x >= W || y >= H || !M[y * W + x]) return false; } return true; };
+  for (let round = 0; round < 60; round++) {
+    const n = L.length, par = L.map((_, i) => i), fd = i => { while (par[i] !== i) i = par[i] = par[par[i]]; return i; };
+    for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) { const a = L[i], b = L[j];
+      if (Math.min(pd(b[0], b[1], a)[0], pd(b[2], b[3], a)[0], pd(a[0], a[1], b)[0], pd(a[2], a[3], b)[0]) < 3 * f) par[fd(i)] = fd(j); }
+    const groups = {}; L.forEach((_, i) => (groups[fd(i)] = groups[fd(i)] || []).push(i));
+    const gs = Object.values(groups).sort((a, b) => b.length - a.length); if (gs.length < 2) break;
+    const main = gs[0]; let best = null;
+    for (const g of gs.slice(1)) for (const i of g) for (const [px, py] of [[L[i][0], L[i][1]], [L[i][2], L[i][3]]]) for (const j of main) {
+      const [d, x, y] = pd(px, py, L[j]); if (d < 70 * f && (!best || d < best.d) && clear(px, py, x, y)) best = { d, s: [px, py, x, y] }; }
+    if (!best) break; L.push(best.s);
+  }
+  return L;
+}
+async function detectShapes() {
+  const bg = ed.lay.bg; if (!bg) { msg($("pmsg"), "Envie primeiro a imagem da planta (🖼 Imagem de fundo)."); return; }
+  if ((ed.lay.shapes || []).length && !confirm("Já existem formas neste piso. Substituir pelas detectadas na imagem?")) return;
+  msg($("pmsg"), "Analisando a imagem…", true);
+  const im = new Image(); im.src = ed.bgOrig || bg.src; await im.decode();
+  const W = Math.min(1300, im.width), H = Math.round(im.height * W / im.width), cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+  const cx = cv.getContext("2d", { willReadFrequently: true }); cx.drawImage(im, 0, 0, W, H); const px = cx.getImageData(0, 0, W, H).data;
+  /* cor do fundo = a mais comum na borda da imagem */
+  const cnt = {}; const key = (i) => ((px[i] >> 4) << 8) | ((px[i + 1] >> 4) << 4) | (px[i + 2] >> 4);
+  for (let x = 0; x < W; x++) for (const y of [0, H - 1]) { const k = key((y * W + x) * 4); cnt[k] = (cnt[k] || 0) + 1; }
+  for (let y = 0; y < H; y++) for (const x of [0, W - 1]) { const k = key((y * W + x) * 4); cnt[k] = (cnt[k] || 0) + 1; }
+  const bk = +Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a])[0], bc = [((bk >> 8) & 15) * 16 + 8, ((bk >> 4) & 15) * 16 + 8, (bk & 15) * 16 + 8];
+  const N = W * H, cls = new Uint8Array(N); /* 1 = loja (branco), 2 = corredor (claro, diferente do fundo) */
+  for (let i = 0; i < N; i++) { const r = px[i * 4], g = px[i * 4 + 1], b = px[i * 4 + 2], mx = Math.max(r, g, b), mn = Math.min(r, g, b), lum = 0.3 * r + 0.59 * g + 0.11 * b;
+    if (mn >= 246 && mx - mn < 10) cls[i] = 1;
+    else if (lum > 150 && Math.hypot(r - bc[0], g - bc[1], b - bc[2]) > 22) cls[i] = 2; }
+  /* abertura morfológica: some com as linhas finas entre lojas, que têm a mesma cor clara do corredor */
+  { const rad = Math.max(2, Math.round(W / 420)), A = new Uint8Array(N); for (let i = 0; i < N; i++) A[i] = cls[i] === 2 ? 1 : 0;
+    const O = morph(morph(A, W, H, rad, false), W, H, rad, true); for (let i = 0; i < N; i++) if (cls[i] === 2 && !O[i]) cls[i] = 0; }
+  const lab = new Int32Array(N), comps = []; let nid = 0;
+  for (let i = 0; i < N; i++) { if (!cls[i] || lab[i]) continue; const c = cls[i], id = ++nid, st = [i]; lab[i] = id; let area = 0, sx = i % W, sy = (i / W) | 0;
+    while (st.length) { const j = st.pop(); area++; const x = j % W, y = (j / W) | 0; if (y < sy || (y === sy && x < sx)) { sx = x; sy = y; }
+      if (x > 0 && !lab[j - 1] && cls[j - 1] === c) { lab[j - 1] = id; st.push(j - 1); } if (x < W - 1 && !lab[j + 1] && cls[j + 1] === c) { lab[j + 1] = id; st.push(j + 1); }
+      if (y > 0 && !lab[j - W] && cls[j - W] === c) { lab[j - W] = id; st.push(j - W); } if (y < H - 1 && !lab[j + W] && cls[j + W] === c) { lab[j + W] = id; st.push(j + W); } }
+    comps.push({ id, c, area, sx, sy }); }
+  const sc = bg.w / W, minStore = Math.max(25, N * 0.00012), shapes = [];
+  const areas = comps.filter(o => o.c === 2).sort((a, b) => b.area - a.area), big = areas.length ? areas[0].area : 0;
+  for (const o of comps) {
+    if (o.c === 1 && o.area < minStore) continue;
+    if (o.c === 2 && o.area < big * 0.06) continue;
+    const f = W / 700; let pts = simplify(traceContour(lab, W, H, o.id, o.sx, o.sy), (o.c === 2 ? 1.6 : 1.1) * f); if (pts.length < 3) continue;
+    pts = squareUp(pts, 1.6 * f).map(([x, y]) => [rr(x * sc), rr(y * sc)]);
+    if (MM.polyInfo(pts).area < 30) continue;
+    shapes.push({ id: "s" + o.id.toString(36) + Date.now().toString(36).slice(-3), k: o.c === 2 ? "area" : "loja", pts });
+  }
+  /* rede de caminhos: esqueleto (linha do meio) das áreas de corredor */
+  const keep = new Set(areas.filter(o => o.area >= big * 0.06).map(o => o.id)), M = new Uint8Array(N);
+  for (let i = 0; i < N; i++) if (keep.has(lab[i])) M[i] = 1;
+  fillHoles(M, cls, W, H);
+  const links = bridge(skeletonLinks(M, W, H, W / 700), M, W, H, W / 700).map((l, i) => ({ id: "g" + i.toString(36), name: "corredor", x1: rr(l[0] * sc), y1: rr(l[1] * sc), x2: rr(l[2] * sc), y2: rr(l[3] * sc) }));
+  snap(); ed.lay.shapes = shapes;
+  if (links.length) {
+    ed.lay.links = links;
+    /* corredores "de cadastro" (nome do corredor de cada loja) vão para baixo da planta, como área de espera das lojas ainda sem forma */
+    let i = 0; for (const k in ed.lay.lanes) { const q = ed.lay.lanes[k], len = Math.max(120, Math.hypot(q.x2 - q.x1, q.y2 - q.y1)); const y = bg.h + 120 + i++ * 110; ed.lay.lanes[k] = { x1: 40, y1: y, x2: 40 + len, y2: y }; }
+    let be = null, bd = Infinity; for (const l of links) for (const [x, y] of [[l.x1, l.y1], [l.x2, l.y2]]) { const d = Math.hypot(x - bg.w / 2, y - bg.h); if (d < bd) { bd = d; be = { x, y }; } }
+    if (be) ed.lay.entry = be;
+  }
+  ed.sel = null; preview(); segPanel(); pz.fit(MM.bounds(ed.g), Infinity);
+  const nl = shapes.filter(x => x.k === "loja").length;
+  msg($("pmsg"), `✓ Detectadas ${nl} lojas, ${shapes.length - nl} área(s) de corredor e ${links.length} trechos de caminho. Agora toque em cada forma e escolha qual loja é (ou toque no nome na lista "sem forma"). Confira a Entrada e salve.`, true);
+}
+$("detect").onclick = () => detectShapes().catch(e => msg($("pmsg"), "Não consegui analisar: " + e.message));
 async function persist(key, dados) {
   if (sb) { const r = dados == null ? await sb.from("layout").delete().eq("chave", key) : await sb.from("layout").upsert({ chave: key, dados, atualizado_em: new Date().toISOString() }); if (r.error) throw r.error; }
   else { try { localStorage.setItem("mm_layouts", JSON.stringify(LAY)); } catch (e) { throw new Error("Sem espaço no navegador para guardar a imagem; use “Exportar layout.json”."); } }
